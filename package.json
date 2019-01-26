@@ -1,0 +1,23 @@
+{
+   "name": "py.js",
+   "version": "1.0.0",
+   "description": "Node.js/Python Bridge; Node.js-hosted Python.",
+   "main": "index.js",
+   "gypfile": true,
+   "scripts": {
+      "build": "node-gyp rebuild",
+      "clean": "node-gyp clean"
+   },
+   "author": "savearray2",
+   "license": "AGPL",
+   "devDependencies": {
+      "node-gyp": "^3.8.0"
+   },
+   "dependencies": {
+      "async": "^2.6.1",
+      "bignumber.js": "^8.0.2",
+      "chalk": "^2.4.2",
+      "moment": "^2.24.0",
+      "node-addon-api": "^1.6.2"
+   }
+}
