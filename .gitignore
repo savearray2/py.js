@@ -83,3 +83,10 @@ __pycache__/
 
 #local files
 local/
+
+#vs-code
+.vscode/
+*.code-workspace
+
+#Python pyenv
+.python-version

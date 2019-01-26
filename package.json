@@ -1,16 +1,24 @@
 {
-   "name": "py.js",
-   "version": "1.0.0",
+   "name": "@savearray2/py.js",
+   "version": "0.0.2",
    "description": "Node.js/Python Bridge; Node.js-hosted Python.",
    "main": "index.js",
    "gypfile": true,
    "scripts": {
       "build": "node-gyp rebuild",
-      "clean": "node-gyp clean"
+      "clean": "node-gyp clean",
+	  "test": "mocha -R dot",
+	  "version": "node test/helpers/99_version.js"
    },
-   "author": "savearray2",
-   "license": "AGPL",
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/savearray2/py.js.git"
+   },
+   "author": "savearray2 <GitHub>",
+   "license": "AGPL-3.0-or-later",
    "devDependencies": {
+      "chai": "^4.2.0",
+      "mocha": "^5.2.0",
       "node-gyp": "^3.8.0"
    },
    "dependencies": {
@@ -19,5 +27,6 @@
       "chalk": "^2.4.2",
       "moment": "^2.24.0",
       "node-addon-api": "^1.6.2"
-   }
+   },
+   "homepage": "https://github.com/savearray2/py.js"
 }

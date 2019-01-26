@@ -173,7 +173,7 @@ void pyjs_async::StartMainPythonLoop(const Napi::CallbackInfo &info)
 // Main Node/Python Async Controller
 ////////////////////////////////////////////
 
-void DestroyAsyncHandler(const Napi::CallbackInfo &info)
+void pyjs_async::DestroyAsyncHandlers()
 {
 	if (!exiting)
 	{
@@ -182,11 +182,7 @@ void DestroyAsyncHandler(const Napi::CallbackInfo &info)
 		//Stop handlers.
 		uv_unref((uv_handle_t*)&ploop.ntp_async_handler);
 		uv_unref((uv_handle_t*)&ploop.ptn_async_handler);
-		uv_unref((uv_handle_t*)&ploop.switching_loop_timer);
-		uv_stop(&ploop.switching_loop);
-		uv_stop(&ploop.loop);
-
-		info[0].As<Napi::Function>().Call({}); //Callback
+		uv_timer_stop(&ploop.switching_loop_timer);
 	}
 }
 
@@ -203,7 +199,6 @@ Napi::Value GetCurrentThreadID(const Napi::CallbackInfo &info)
 
 Napi::Object pyjs_async::InitThreading(Napi::Env env, Napi::Object exports)
 {
-	exports.Set("$DestroyAsyncHandler", Napi::Function::New(env, DestroyAsyncHandler));
 	exports.Set("$GetCurrentThreadID", Napi::Function::New(env, GetCurrentThreadID));	
 	return exports;
 }

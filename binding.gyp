@@ -13,18 +13,27 @@
         ],
         "conditions": [
             ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris"', {
+                "variables": {
+                    "python_config_ldflags%": "<!(python3-config --ldflags)",
+					"python_config_cflags%": "<!(python3-config --cflags)"
+                },
                 "cflags": [
-                    "<!(python3-config --cflags)",
+                    "<(python_config_cflags)",
                     "-Xlinker -export-dynamic"
                 ],
                 "cflags!": [ "-fno-exceptions" ],
                 "cflags_cc!": [ "-fno-exceptions" ],
                 "cflags_cc": [ "-std=c++17" ],
-                "libraries": [
-                    "<!(python3-config --libs)"
+                "ldflags": [
+					"-Wl,--no-as-needed",
+                    "<(python_config_ldflags)"
                 ]
                 }],
             ['OS=="mac"', {
+				"libraries": [
+			        "-L<!(python3-config --prefix)/lib",
+                    "<!(python3-config --libs)"
+                ],
                 "xcode_settings": {
                     "cflags": [
                         "<!(python3-config --cflags)",
@@ -34,7 +43,7 @@
                         "<!(python3-config --cflags)"
                     ],
                     "OTHER_LDFLAGS": [
-                        "<!(python3-config --ldflags)"
+                        "<!(python3-config --ldflags | sed -e 's/-Wl,-stack_size,[0-9]*.-framework.CoreFoundation//g')"
                     ],
 					"GCC_ENABLE_CPP_EXCEPTIONS": "YES",
     				'CLANG_CXX_LIBRARY': 'libc++',
@@ -43,10 +52,10 @@
             }],
 			['OS=="win"', {
 				"include_dirs": [
-					'<@(python_include)\\include'
+					'<(python_include)\\include'
 				],
 				"library_dirs": [
-					"<@(python_include)\\libs"
+					"<(python_include)\\libs"
 				],
 				"defines": [
 					'_HAS_EXCEPTIONS=1'

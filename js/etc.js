@@ -200,27 +200,6 @@ _local.object_attributes = {
 		$getType: (t) => t.$getType,
 		$getMode: (t) => t.$getMode,
 		$mode: (t) => t.$mode,
-
-		//TODO might want to check if these exist if we're going to print them on inspect
-		//Magic Name/Dunder shortcuts
-		$str: (t) => t._p.__str__,
-
-		//===> Comparisons
-		$lt: (t) => t._p.__lt__,
-		$lte: (t) => t._p.__le__,
-		$eq: (t) => t._p.__eq__,
-		$ne: (t) => t._p.__ne__,
-		$gt: (t) => t._p.__gt__,
-		$gte: (t) => t._p.__ge__,
-
-		$add: (t) => t._p.__add__,
-		$sub: (t) => t._p.__sub__,
-		$mul: (t) => t._p.__mul__,
-		$div: (t) => t._p.__div__,
-
-		//===> General Properties
-		$length: (t) => t._p.__len__,
-
 		//Async handler
 		$async: (t) => function (fn) {
 			if (fn !== undefined 
@@ -229,6 +208,26 @@ _local.object_attributes = {
 
 			return t.$hidden_mode({explicitAsync: true, callback: fn})
 		}
+	},
+	dunder: {
+		//Magic Name/Dunder shortcuts
+		$str: '__str__',
+
+		//===> Comparisons
+		$lt: '__lt__',
+		$lte: '__le__',
+		$eq: '__eq__',
+		$ne: '__ne__',
+		$gt: '__gt__',
+		$gte: '__ge__',
+	
+		$add: '__add__',
+		$sub: '__sub__',
+		$mul: '__mul__',
+		$div: '__div__',
+	
+		//===> General Properties
+		$length: '__len__'
 	},
 	callable: {
 		$apply: (t) => t.$apply
@@ -390,8 +389,9 @@ _etc.marshalling_factory = (obj) =>　{
 		== _etc.python_object_type.TYPE
 	func.$_get_special_attributes = (t) => {
 		let m = new Map(Object.entries(_local.object_attributes.all))
-		let o_type = t.py.GetObjectType();
+		let o_type = t.py.GetObjectType()
 		let is_class = o_type == _etc.python_object_type.TYPE
+		let attrs = t.py.GetAttributeList()
 
 		if (t.py.IsCallable())
 			for (const attr of Object.entries(_local.object_attributes.callable))
@@ -400,6 +400,12 @@ _etc.marshalling_factory = (obj) =>　{
 		if (is_class)
 			for (const attr of Object.entries(_local.object_attributes.class))
 				m.set(attr[0], attr[1])
+
+			for (const attr of Object.entries(_local.object_attributes.dunder))
+			{
+				if (attrs.includes(attr[1]))
+					m.set(attr[0], (t) => func._p[attr[1]])
+			}
 
 		return m
 	}

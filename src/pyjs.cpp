@@ -62,7 +62,22 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 	//Further JS -> Python marshalling performed after this point.
 	obj = nullptr;
 
-	if (val.IsNumber())
+	if (val.IsBoolean())
+	{
+		if (val.ToBoolean())
+		{
+			obj = Py_True;
+			Py_INCREF(obj);
+			pot = PyObjectType::Bool;
+		}
+		else
+		{
+			obj = Py_False;
+			Py_INCREF(obj);
+			pot = PyObjectType::Bool;		
+		}
+	}
+	else if (val.IsNumber())
 	{
 		//This should work, but Python seems to be platform specific.
 		obj = PyFloat_FromDouble(val.As<Napi::Number>().DoubleValue()); //PyFloat_FromDouble (New)
@@ -562,7 +577,8 @@ Napi::Value pyjs::PyjsConfigurationOptions::SetDebugMessagingCallback(const Napi
 	Napi::Env env = info.Env();
 	pyjs::PyjsConfigurationOptions::debug_messaging_callback_ = 
 		std::make_unique<napi_ext::ThreadSafeCallback>(info[0].As<Napi::Function>());
-	
+	debug_messaging_callback_->unref();
+
 	return env.Undefined();
 }
 
@@ -601,7 +617,7 @@ bool pyjs::PyjsConfigurationOptions::IsDebugEnabled()
 static Napi::Value Import(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
-	NOT_INITIALIZED(env);
+
 	PyObject* module_name;
 	PyObject* module;
 
@@ -685,21 +701,6 @@ static Napi::Value Global(const Napi::CallbackInfo &info)
 		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);	
 }
 
-Napi::Value InstanceInformation_SetPythonHome(const Napi::CallbackInfo &info)
-{
-	Napi::Env env = info.Env();
-
-	PyObject* path = PyUnicode_FromString(info[0].ToString().Utf8Value().c_str());
-	Py_ssize_t* size = nullptr;
-	Py_SetPythonHome(PyUnicode_AsWideCharString(path, size));
-
-	//NAPI_ERROR(env, "There was an issue converting the provided string.");
-	Py_XDECREF(path);
-	PyMem_Free(size);
-
-	return env.Null();
-}
-
 Napi::Object InstanceInformation(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
@@ -720,8 +721,6 @@ Napi::Object InstanceInformation(const Napi::CallbackInfo &info)
 		Py_DECREF(pythonHome);
 	}
 
-	//obj.Set("set_python_home", Napi::Function::New(env, InstanceInformation_SetPythonHome));
-
 	return obj;
 }
 
@@ -734,6 +733,7 @@ PyObject* pyjs::FunctionBridgeRegisterCallback(const Napi::Env& env, Napi::Funct
 	lock_gil lock_me;
 
 	napi_ext::ThreadSafeCallback* callback = new napi_ext::ThreadSafeCallback(f);
+	callback->unref();
 	//and into integer for long-term Python storage...
 	auto tmp = PyLong_FromSsize_t((Py_ssize_t)callback);
 	return tmp;
@@ -953,21 +953,47 @@ static Napi::Value Initialize(const Napi::CallbackInfo &info)
 	return env.Undefined();
 }
 
-static Napi::Value Finalize(const Napi::CallbackInfo &info)
+static Napi::Value BeginFinalize(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
 
 	PY_DEBUG("py.js says goodbye. finalize called.");
+	pyjs_async::DestroyAsyncHandlers();
 	Py_XDECREF(__pyjs_module_);
-	Py_Finalize();
 
 	return env.Undefined();
 }
 
+////////////////////////////////////////////
+// Pre-Init & Setup
+////////////////////////////////////////////
+
+/*static Napi::Value PreInit_SetPythonHome(const Napi::CallbackInfo &info)
+{
+	Napi::Env env = info.Env();
+
+	PyObject* path = PyUnicode_FromString(info[0].ToString().Utf8Value().c_str());
+	Py_ssize_t* size = nullptr;
+	Py_SetProgramName(PyUnicode_AsWideCharString(path, size));
+	Py_XDECREF(path);
+	PyMem_Free(size);
+
+	return env.Null();
+}
+
+static Napi::Object PreInit_Settings_Object(const Napi::Env env, Napi::Object exports)
+{
+	Napi::Object obj = Napi::Object::New(env);
+	obj.Set("set_python_home", Napi::Function::New(env, PreInit_SetPythonHome));
+
+	return obj;
+}*/
+
 static Napi::Object InitAll(Napi::Env env, Napi::Object exports)
 {
+	//exports.Set("settings", PreInit_Settings_Object(env, exports));
 	exports.Set("init", Napi::Function::New(env, Initialize));
-	exports.Set("finalize", Napi::Function::New(env, Finalize));
+	exports.Set("beginFinalize", Napi::Function::New(env, BeginFinalize));
 	exports.Set("eval", Napi::Function::New(env, Eval));
 	exports.Set("evalAsFile", Napi::Function::New(env, EvalAsFile));
 	exports.Set("global", Napi::Function::New(env, Global));

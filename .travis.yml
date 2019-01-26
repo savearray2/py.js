@@ -1,0 +1,194 @@
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      dist: xenial
+      name: "Linux (Ubuntu Xenial 16.04 LTS): Node LTS & g++8 & python3 Current"
+      before_install:
+        #Update pyenv
+        - |-
+          git clone https://github.com/yyuu/pyenv.git ~/.pyenv
+        - |-
+          git clone https://github.com/yyuu/pyenv-virtualenvwrapper.git ~/.pyenv/plugins/pyenv-virtualenvwrapper
+        - |-
+          export PYENV_ROOT="$HOME/.pyenv"
+        - |-
+          export PATH="$PYENV_ROOT/bin:$PATH"
+        - |-
+          eval "$(pyenv init -)"
+        - |-
+          pyenv virtualenvwrapper
+        - |-
+          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b] | tail -1)
+        - |-
+          echo Latest version of Python from pyenv = ${PY_LATEST}
+        #Install Current Node LTS
+        - nvm install --lts
+        - nvm use --lts
+        - |-
+          export LD_LIBRARY_PATH="$(python3-config --prefix)/lib:$LD_LIBRARY_PATH"
+        #Package Updates
+        - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        - sudo apt-get update -qq
+        # g++ 8
+        - sudo apt-get install -qq g++-8
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
+      install:
+        #Upgrade Python
+        - |-
+          PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install ${PY_LATEST}
+        - |-
+          pyenv install 2.7.15
+        - pyenv rehash
+        - pyenv versions
+        - pyenv global 2.7.15 ${PY_LATEST}
+        - pyenv local 2.7.15 ${PY_LATEST}
+        - python3 --version
+        - node --version
+        - npm install --verbose --python_config_ldflags="$(python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
+      script:
+        - pyenv global ${PY_LATEST}
+        - pyenv local ${PY_LATEST}
+        - python --version
+        - python3 --version
+        - |-
+          ls $(python3-config --prefix)/lib
+        - |-
+          readelf -d build/Release/pyjs.node | grep 'R.*PATH'
+        - |-
+          ldd -r build/Release/pyjs.node
+        - |- 
+          node test/helpers/99_version.js
+        - npm test
+    - os: linux
+      compiler: gcc
+      dist: xenial
+      name: "Linux (Ubuntu Xenial 16.04 LTS): Node Current & g++8 & python3 Current"
+      before_install:
+        #Update pyenv
+        - |-
+          git clone https://github.com/yyuu/pyenv.git ~/.pyenv
+        - |-
+          git clone https://github.com/yyuu/pyenv-virtualenvwrapper.git ~/.pyenv/plugins/pyenv-virtualenvwrapper
+        - |-
+          export PYENV_ROOT="$HOME/.pyenv"
+        - |-
+          export PATH="$PYENV_ROOT/bin:$PATH"
+        - |-
+          eval "$(pyenv init -)"
+        - |-
+          pyenv virtualenvwrapper
+        - |-
+          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b] | tail -1)
+        - |-
+          echo Latest version of Python from pyenv = ${PY_LATEST}
+        #Install Current Node
+        - nvm install node
+        - nvm use node
+        #Package Updates
+        - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        - sudo apt-get update -qq
+        # g++ 8
+        - sudo apt-get install -qq g++-8
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
+      install:
+        #Upgrade Python
+        - |-
+          PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install ${PY_LATEST}
+        - |-
+          pyenv install 2.7.15
+        - pyenv rehash
+        - pyenv versions
+        - pyenv global 2.7.15 ${PY_LATEST}
+        - pyenv local 2.7.15 ${PY_LATEST}
+        - python3 --version
+        - node --version
+        - npm install --verbose --python_config_ldflags="$(python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
+      script:
+        - pyenv global ${PY_LATEST}
+        - pyenv local ${PY_LATEST}
+        - python --version
+        - python3 --version
+        - |-
+          ls $(python3-config --prefix)/lib
+        - |-
+          readelf -d build/Release/pyjs.node | grep 'R.*PATH'
+        - |-
+          ldd -r build/Release/pyjs.node
+        - |- 
+          node test/helpers/99_version.js
+        - npm test
+    - os: linux
+      compiler: gcc
+      dist: trusty
+      name: "Linux (Ubuntu Trusty 14.04 LTS): Node LTS & g++6 & python 3.5"
+      before_install:
+        #Update pyenv
+        - |-
+          git clone https://github.com/yyuu/pyenv.git ~/.pyenv
+        - |-
+          git clone https://github.com/yyuu/pyenv-virtualenvwrapper.git ~/.pyenv/plugins/pyenv-virtualenvwrapper
+        - |-
+          export PYENV_ROOT="$HOME/.pyenv"
+        - |-
+          export PATH="$PYENV_ROOT/bin:$PATH"
+        - |-
+          eval "$(pyenv init -)"
+        - |-
+          pyenv virtualenvwrapper
+        - |-
+          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b] | tail -1)
+        - |-
+          echo Latest version of Python from pyenv = ${PY_LATEST}
+        #Install Current Node LTS
+        - nvm install --lts
+        - nvm use --lts
+        - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        - sudo apt-get update -qq
+        # g++ 6
+        - sudo apt-get install -qq g++-6
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
+        - python3 --version
+      install:
+        #Upgrade Python
+        - |-
+          PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.5.6
+        - |-
+          pyenv install 2.7.15
+        - pyenv rehash
+        - pyenv versions
+        - pyenv global 2.7.15 3.5.6
+        - pyenv local 2.7.15 3.5.6
+        - python3 --version
+        - node --version
+        - npm install --verbose --python_config_ldflags="$(python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
+      script:
+        - pyenv global 3.5.6
+        - pyenv local 3.5.6
+        - python --version
+        - python3 --version
+        - |-
+          ls $(python3-config --prefix)/lib
+        - |-
+          readelf -d build/Release/pyjs.node | grep 'R.*PATH'
+        - |-
+          ldd -r build/Release/pyjs.node
+        - |- 
+          node test/helpers/99_version.js
+        - npm test
+    - os: osx
+      osx_image: xcode10.1
+      compiler: clang
+      name: "OSX (10.13): Node Current & python3 Current"
+      before_install:
+        #Install Current Node LTS + Python3
+        - brew update
+        - brew upgrade python3
+        - brew upgrade nodejs
+      install:
+        - node --version
+        - python3 --version
+        - npm install --verbose
+      script:
+        - node test/helpers/99_version.js
+        - npm test

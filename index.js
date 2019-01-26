@@ -46,7 +46,7 @@ const _debug_handler = function() {
 ////////////////////////////////////////////
 
 _etc.set_pyjs(_pyjs)
-_pyjs.$SetDebugMessagingCallback(_debug_handler);
+_pyjs.$SetDebugMessagingCallback(_debug_handler)
 _pyjs.$SetSerializationCallbackConstructor(_etc.default_serializer)
 _pyjs.$SetSerializationFilterConstructor(_etc.serializaition_filter)
 _pyjs.$SetUnmarshallingFilter(_etc.unmarshalling_filter)
@@ -113,6 +113,9 @@ pyjs.evalAsFile = function (code, path) {
 	_pyjs.evalAsFile(code, path)
 }
 
+//Shortcuts
+//pyjs.e = 
+
 ////////////////////////////////////////////
 // Helpers (pyjs_common.cpp)
 ////////////////////////////////////////////
@@ -142,7 +145,8 @@ pyjs.$coerceAs.int = pyjs.$coerceAs.Integer
 
 let _exit_handler;
 
-pyjs.init = ({ 	exitHandler: exit_handler, 
+pyjs.init = ({ 	exitHandler: exit_handler,
+				pythonHome: python_home, 
 				pythonPath: python_path } = {}) => {
 
 	if (_etc.parameter_check.methods.function.f(exit_handler)) {
@@ -152,11 +156,18 @@ pyjs.init = ({ 	exitHandler: exit_handler,
 		throw Error("Option 'exitHandle' must be a function.")
 	}
 
+	if (_etc.parameter_check.methods.string.f(python_home)) {
+		process.env.PYTHONHOME = python_home
+	}
+	else if (!_etc.parameter_check.methods.undefined.f(python_home)) {
+		throw Error("Option 'pythonHome' must be a string.")
+	}
+
 	if (_etc.parameter_check.methods.string.f(python_path)) {
 		process.env.PYTHONPATH = python_path
 	}
 	else if (!_etc.parameter_check.methods.undefined.f(python_path)) {
-		throw Error("Option 'pythonPath' must be a function.")
+		throw Error("Option 'pythonPath' must be a string.")
 	}
 
 	_pyjs.init()
@@ -179,26 +190,72 @@ pyjs.init = ({ 	exitHandler: exit_handler,
 // Finalization Logic
 ////////////////////////////////////////////
 
-pyjs.$destroyAsyncServer = () => {
-	try
-	{
-		_pyjs.$DestroyAsyncHandler(() => {
-			_pylib.exit()
-			if (_exit_handler !== undefined)
-				_exit_handler()
-		})
+let _finalize_listener = () => {
+	pyjs.finalize()
+	process.exit()
+}
+
+pyjs.finalize = () => {
+	//Call any handlers if we have them
+	if (_exit_handler !== undefined)
+		_exit_handler()
+	
+	_pyjs.beginFinalize()
+	//TODO make sure all async functions are destructed here
+
+	for (let n in pyjs) {
+		pyjs[n] = () => {
+			throw Error("Finalize has already been called.")	
+		}
 	}
-	catch //Python will most likely throw a SystemExit excpetion.
-	{
-		process.exit()
-	}
+
+	//Force Python to clear everything itself, no matter what threads are open
+	//Seems that Py_Finalize/Ex sometimes hangs with other threads open
+	try { _pylib.exit() } catch {}
+
+	process.removeListener('SIGINT', _finalize_listener)
+	process.removeListener('SIGTERM', _finalize_listener)
 }
 
 //Exit is only called when the event loop ends or process.exit is called.
 //process.once('exit', pyjs.$destroyAsyncServer)
 
-process.once('SIGINT', pyjs.$destroyAsyncServer)
-process.once('SIGTERM', pyjs.$destroyAsyncServer)
+//Allow user to override defaults here
+process.once('SIGINT', _finalize_listener)
+process.once('SIGTERM', _finalize_listener)
+
+pyjs.$DisableProcessSigListeners = () => {
+	process.removeListener('SIGINT', _finalize_listener)
+	process.removeListener('SIGTERM', _finalize_listener)
+}
+
+////////////////////////////////////////////
+// Initialization Handler
+////////////////////////////////////////////
+
+//This needs to be last.
+(() => {
+	let activated_ = Object.assign({}, pyjs)
+
+	for (let n in pyjs) {
+		pyjs[n] = () => {
+			throw Error("py.js needs to be initialized. please call init() or wait for python to fully initialize")
+		}
+	}
+
+	pyjs.init = function() {
+		activated_.init.apply(this, arguments)
+		for (let n in pyjs) {
+			pyjs[n] = activated_[n]
+		}
+
+		pyjs.init = () => {
+			throw Error("py.js has already been initialized.")
+		}
+
+		return pyjs
+	}
+})()
 
 ////////////////////////////////////////////
 // Export

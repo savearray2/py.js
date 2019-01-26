@@ -129,6 +129,7 @@ namespace pyjs_async
 	static std::mutex _async_cb_mutex;
 
 	void InitializeAsyncMessageSystem(const Napi::CallbackInfo &info);
+	void DestroyAsyncHandlers();
 }
 
 //////////////////////////////////////////
@@ -272,13 +273,6 @@ namespace pyjs_utils
 	if (env.IsExceptionPending())							\
 		for (PyObject* _pyobj : _pyobj_vector)				\
 			Py_XDECREF(_pyobj);								\
-
-#define NOT_INITIALIZED(env)								\
-	if (!Py_IsInitialized())								\
-	{														\
-		NAPI_ERROR(env, "py.js needs to be initialized. please call init() or wait for python to fully initialize"); \
-		return env.Null();									\
-	}
 
 #define UV_CHECK_START()									\
 	int _uv_err;
