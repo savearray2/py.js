@@ -15,7 +15,7 @@
             ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris"', {
                 "variables": {
                     "python_config_ldflags%": "<!(python3-config --ldflags)",
-					"python_config_cflags%": "<!(python3-config --cflags)"
+					"python_config_cflags%": "<!(python3-config --cflags | sed s/-Wstrict-prototypes//)"
                 },
                 "cflags": [
                     "<(python_config_cflags)",

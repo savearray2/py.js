@@ -199,6 +199,57 @@ let t = describe('pyjs basic functions', function() {
 			assert.strictEqual(p.import('01_basic').basic_class()(50.5).test(), 50.5)
 		})
 	})
+
+	describe('[js->py] null or undefined to none', function() {
+		it('01_basic#basic_none_j(null) returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_none_j(null))
+		})
+		
+		it('01_basic#basic_none_j(undefined) returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_none_j(undefined))
+		})
+	})
+
+	describe('[js->py] bool to bool', function() {
+		it('01_basic#basic_bool_j(true,false) returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_bool_j(true,false))
+		})
+		
+		it('01_basic#basic_bool_j(true,false) returns true', function() {
+			assert.isFalse(p.import('01_basic').basic_bool_j(false,true))
+		})
+	})
+
+	describe('[js->py] float to float', function() {
+		it('01_basic#basic_float_j(12830.8877) returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_float_j(12830.8877))
+		})
+	})
+
+	describe('[js->py] string to string', function() {
+		it('01_basic#basic_string_j("あいうえお") returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_string_j('あいうえお'))
+		})
+	})
+
+	describe('[js->py] array to list', function() {
+		it('01_basic#basic_list_j([1.1,"a",99.9,True]) returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_list_j([1.1,'a',99.9,true]))
+		})
+	})
+
+	describe('[js->py] object to dictionary', function() {
+		it('01_basic#basic_list_j({a: 1.3, b: 100.1,"あいうえお":{7.0: True}}) returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_dict_j(
+				{
+					a: 1.3, b: 100.1,
+					"あいうえお": {
+						'7': true
+					}
+				}
+			))
+		})
+	})
 })
 
 t.afterAll(() => {

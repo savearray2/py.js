@@ -49,13 +49,17 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 	NapiPyObject* _napi_obj_tmp;
 	if ((_napi_obj_tmp = pyjs::PyjsConfigurationOptions::AttemptNapiObjectUnmarshalling(env, val)))
 	{
-		return std::make_pair(_napi_obj_tmp->GetPyObject(env),
+		PyObject* obj = _napi_obj_tmp->GetPyObject(env);
+		Py_INCREF(obj); //Clone
+		return std::make_pair(obj,
 			_napi_obj_tmp->GetObjectTypeUnwrapped());
 	}
 	else if (NapiPyObject::IsInstanceOfNative(env, val))
 	{
 		_napi_obj_tmp = Napi::ObjectWrap<NapiPyObject>::Unwrap(val.As<Napi::Object>());
-		return std::make_pair(_napi_obj_tmp->GetPyObject(env),
+		PyObject* obj = _napi_obj_tmp->GetPyObject(env);
+		Py_INCREF(obj); //Clone
+		return std::make_pair(obj,
 			_napi_obj_tmp->GetObjectTypeUnwrapped());
 	}
 
@@ -217,7 +221,18 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 			napi_value napi_ele;
 			NAPI_DIRECT_FUNC(napi_get_element, napi_arr, i, &napi_ele);
 			Napi::Value napiVal = Napi::Value(env, napi_ele);
-			PyObject* key = PyUnicode_FromString(napiVal.As<Napi::String>().Utf8Value().c_str()); //PyUnicode_FromString (New)
+
+			PyObject* key;		
+
+			if (napiVal.IsNumber())
+			{
+				key = PyFloat_FromDouble(napiVal.ToNumber().DoubleValue()); //PyFloat_FromDouble (New)
+			}
+			else
+			{
+				key = PyUnicode_FromString(napiVal.As<Napi::String>().Utf8Value().c_str()); //PyUnicode_FromString (New)	
+			}
+			
 			napi_value napi_val;
 			NAPI_DIRECT_FUNC(napi_get_property, napi_obj, napi_ele, &napi_val);
 			PyObject* res = pyjs::Js_ConvertToPython(env, Napi::Value(env, napi_val), filters).first;
@@ -426,6 +441,8 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 		python_to_javascript_map->insert(std::make_pair(obj, napi_array));
 
 		Py_ssize_t pos = 0;
+		//Elements may not be contiguous, so add a count for us.
+		Py_ssize_t count = 0;
 		PyObject *key, *val;
 
 		while (PyDict_Next(obj, &pos, &key, &val)) //PyDict_Next (Borrow)
@@ -437,7 +454,7 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 			pair.Set("key", n_key);
 			pair.Set("value", n_val);
 
-			NAPI_DIRECT_FUNC(napi_set_element, napi_array, pos - 1, pair);
+			NAPI_DIRECT_FUNC(napi_set_element, napi_array, count++, pair);
 		}
 
 		napiValue = NapiPyObject::serialization_callback_.Call(

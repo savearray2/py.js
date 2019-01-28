@@ -1,3 +1,23 @@
+#//////////////////////////////////////////////////////////////////////////
+#//	py.js - Node.js/Python Bridge; Node.js-hosted Python.
+#//	Copyright (C) 2019  Michael Brown
+#//
+#//	This program is free software: you can redistribute it and/or modify
+#//	it under the terms of the GNU Affero General Public License as
+#//	published by the Free Software Foundation, either version 3 of the
+#//	License, or (at your option) any later version.
+#//
+#//	This program is distributed in the hope that it will be useful,
+#//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#//	GNU Affero General Public License for more details.
+#//
+#//	You should have received a copy of the GNU Affero General Public License
+#//	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#//////////////////////////////////////////////////////////////////////////
+
+# Py->JS Tests
+
 def basic_none():
 	return None
 
@@ -34,4 +54,25 @@ def basic_class():
 		def test(self):
 			return self.i
 	return bclass
+
+#//////////////////////////////////////////////////////////////////////////
 	
+# JS->Py Tests
+
+def basic_none_j(o):
+	return o == None
+
+def basic_bool_j(a,b):
+	return a == True and b == False
+
+def basic_float_j(a):
+	return a == 12830.8877
+
+def basic_string_j(a):
+	return 'あいうえお' == a
+
+def basic_list_j(a):
+	return [1.1,'a',99.9,True] == a
+
+def basic_dict_j(a):
+	return {'a': 1.3, 'b': 100.1, 'あいうえお': { 7.0:True } } == a

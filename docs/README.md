@@ -101,7 +101,7 @@ export LD_LIBRARY_PATH="$(python3-config --prefix)/lib:$LD_LIBRARY_PATH"
 
 Some distributions may also use different utilities and methodologies to find shared libraries. For example, Ubuntu uses ```ldconfig```. Please refer to your distributions's manual for more information, and for the best way to reference shared libraries on your system. There also may be certain security implications depending on the method you pick.
 
-If you wish, you may also link the library produced by ```node-gyp``` with a ```RPATH``` or ```RUNPATH``` reference. The *LDFLAGS* and *CFLAGS* options are configurable with the ```python_config_cflags``` and ```python_config_ldflags``` command-line flags. Here is an example of how they might be used:
+If you wish, you may also link the shared Python library during the  ```node-gyp``` build process with a ```RPATH``` or ```RUNPATH``` reference. The *LDFLAGS* and *CFLAGS* options are configurable through the ```python_config_cflags``` and ```python_config_ldflags``` command-line flags. Here is an example of how they might be used:
 
 ```bash
 npm install --verbose --python_config_ldflags="$(python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
