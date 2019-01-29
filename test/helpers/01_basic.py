@@ -24,6 +24,9 @@ def basic_none():
 def basic_bool():
 	return False
 
+def basic_int():
+	return 1789
+
 def basic_float():
 	return 10234678.5
 
@@ -37,10 +40,13 @@ def basic_string():
 	return 'this is a string'
 
 def basic_list():
-	return [None,123.4,str.encode('あいうえお'),bytearray('好的', 'utf-8'),'list']
+	return [1,None,123.4,str.encode('あいうえお'),bytearray('好的', 'utf-8'),'list']
 
 def basic_dict():
 	return {'a': 1.3, 'b': 2.1, 'c': 3.5, 100.1: 's', '好的': True}
+
+def basic_set():
+	return set([1,2,3,4,'c',10.1])
 
 def basic_function():
 	def bfun():
@@ -56,7 +62,7 @@ def basic_class():
 	return bclass
 
 #//////////////////////////////////////////////////////////////////////////
-	
+
 # JS->Py Tests
 
 def basic_none_j(o):
@@ -64,6 +70,9 @@ def basic_none_j(o):
 
 def basic_bool_j(a,b):
 	return a == True and b == False
+
+def basic_int_j(a):
+	return a == 98359834579
 
 def basic_float_j(a):
 	return a == 12830.8877

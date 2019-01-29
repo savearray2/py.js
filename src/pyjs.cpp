@@ -81,6 +81,12 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 			pot = PyObjectType::Bool;		
 		}
 	}
+	else if (val.Type() == napi_valuetype::napi_bigint)
+	{
+		//TODO: write a better conversion at some point here
+		obj = PyLong_FromString(val.ToString().Utf8Value().c_str(), NULL, 10);
+		pot = PyObjectType::Integer;
+	}
 	else if (val.IsNumber())
 	{
 		//This should work, but Python seems to be platform specific.
@@ -282,6 +288,7 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 	//Integer
 	else if (PyLong_CheckExact(obj))
 	{
+		//TODO: Create a faster/better conversion in the future.
 		PyObject* str = PyObject_Str(obj); //PyObject_Str (New)
 		std::string strs = PyUnicode_AsUTF8(str);
 		napiValue = NapiPyObject::serialization_callback_.Call(
@@ -472,7 +479,42 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 	//Set
 	else if (PyAnySet_CheckExact(obj))
 	{
-		NAPI_ERROR(env, "Python Type (<class 'set'>) is not currently supported.");
+		auto it = python_to_javascript_map->find(obj);
+		if (it != python_to_javascript_map->end())
+		{
+			return Napi::Value(env, it->second);
+		}
+
+		auto size = PySet_GET_SIZE(obj);
+		auto list = PySequence_List(obj); //PySequence_List (New)
+		NAPI_DIRECT_START(env);
+		napi_value napi_array;
+		NAPI_DIRECT_FUNC(napi_create_array_with_length, size, &napi_array);
+
+		python_to_javascript_map->insert(std::make_pair(obj, napi_array));
+
+		for (Py_ssize_t i = 0; i < size; i++)
+		{
+			PyObject* itm = PySequence_Fast_GET_ITEM(list, i); //PySequence_Fast_GET_ITEM (Borrowed)
+			Napi::Value val = Py_ConvertToJavascript(env, itm, filters,
+				python_to_javascript_map, marshalling_options);
+
+			val = NapiPyObject::serialization_callback_.Call(
+			{
+				Napi::Number::New(env, PyObjectType::_JS_Wrap),
+				val
+			});
+
+			NAPI_DIRECT_FUNC(napi_set_element, napi_array, i, val);
+		}
+
+		Py_DECREF(list);
+
+		napiValue = NapiPyObject::serialization_callback_.Call(
+		{
+			Napi::Number::New(env, PyObjectType::Set),
+			napi_array
+		});
 	}
 	//Instance Method
 	else if (PyInstanceMethod_Check(obj))

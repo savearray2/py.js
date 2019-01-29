@@ -97,6 +97,16 @@ describe('pyjs: basic functions', function() {
 		})
 	})
 
+	describe('[py->js] int to bigint', function() {
+		it('01_basic#basic_int()returns a bigint', function() {
+			assert.isTrue(typeof(p.import('01_basic').basic_int()) == 'bigint')
+		})
+
+		it('01_basic#basic_int() returns 1789n', function() {
+			assert.strictEqual(p.import('01_basic').basic_int(), 1789n)
+		})
+	})
+
 	describe('[py->js] float to float', function() {
 		it('01_basic#basic_float()returns a float', function() {
 			assert.isNumber(p.import('01_basic').basic_float())
@@ -143,7 +153,7 @@ describe('pyjs: basic functions', function() {
 		})
 
 		it('01_basic#basic_list() returns "[null,123.4,Buffer.from("あいうえお"),Buffer.from("好的"),"list"]', function() {
-			assert.deepStrictEqual(p.import('01_basic').basic_list(), [null, 123.4, Buffer.from("あいうえお"), Buffer.from("好的"), "list"])
+			assert.deepStrictEqual(p.import('01_basic').basic_list(), [1n, null, 123.4, Buffer.from("あいうえお"), Buffer.from("好的"), "list"])
 		})
 	})
 
@@ -170,6 +180,14 @@ describe('pyjs: basic functions', function() {
 				assert.isTrue(map.has(a))
 				assert.deepStrictEqual(dict.get(a), map.get(a))
 			}
+		})
+	})
+
+	describe('[py->js] set to set', function() {
+		it('01_basic#basic_set()', function () {
+			let set = p.import('01_basic').basic_set()
+			let arr = [1n,2n,3n,4n,'c',10.1]
+			arr.forEach(n => assert.isTrue(set.has(n)))
 		})
 	})
 
@@ -222,6 +240,12 @@ describe('pyjs: basic functions', function() {
 		})
 	})
 
+	describe('[js->py] bigint to int', function() {
+		it('01_basic#basic_int_j(98359834579n) returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_int_j(98359834579n))
+		})
+	})
+
 	describe('[js->py] float to float', function() {
 		it('01_basic#basic_float_j(12830.8877) returns true', function() {
 			assert.isTrue(p.import('01_basic').basic_float_j(12830.8877))
@@ -271,7 +295,13 @@ describe('pyjs: basic functions', function() {
 		})
 
 		it('01_basic#basic_echo_tester(1)', function() {
-			assert.strictEqual(1, p.import('01_basic').basic_echo_tester(1))
+			let big = ""
+			for (let i = 0; i < 500; i++) big += "9"
+			assert.strictEqual(big, p.import('01_basic').basic_echo_tester(big))
+		})
+
+		it('01_basic#basic_echo_tester(1.234)', function() {
+			assert.strictEqual(1.234, p.import('01_basic').basic_echo_tester(1.234))
 		})
 
 		it('01_basic#basic_echo_tester("abcd")', function() {
@@ -279,11 +309,11 @@ describe('pyjs: basic functions', function() {
 		})
 
 		it('01_basic#basic_echo_tester([1,2,3,"あ"])', function() {
-			assert.deepStrictEqual([1,2,3,'あ'], p.import('01_basic').basic_echo_tester([1,2,3,'あ']))
+			assert.deepStrictEqual([1,2,3,'あ',1500n], p.import('01_basic').basic_echo_tester([1,2,3,'あ',1500n]))
 		})
 
 		it('01_basic#basic_echo_tester({a: 1, b: 2, c: {d: true}})', function() {
-			let obj = {a: 1, b: 2, c: {d: true}}
+			let obj = {a: 1, b: 2, c: {d: true, e: 10000n}}
 			let map = p.import('01_basic').basic_echo_tester(obj)
 			assert.deepStrictEqual(obj, map_to_object(map))
 		})

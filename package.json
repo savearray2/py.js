@@ -7,8 +7,8 @@
    "scripts": {
       "build": "node-gyp rebuild",
       "clean": "node-gyp clean",
-	  "test": "mocha -R dot",
-	  "version": "node test/helpers/99_version.js"
+      "test": "mocha -R dot",
+      "version": "node test/helpers/99_version.js"
    },
    "repository": {
       "type": "git",
@@ -23,13 +23,12 @@
    },
    "dependencies": {
       "async": "^2.6.1",
-      "bignumber.js": "^8.0.2",
       "chalk": "^2.4.2",
       "moment": "^2.24.0",
       "node-addon-api": "^1.6.2"
    },
    "homepage": "https://github.com/savearray2/py.js",
-	"engines" : { 
-		"node" : ">=10.0.0" 
-	}
+   "engines": {
+      "node": ">=10.4.0"
+   }
 }

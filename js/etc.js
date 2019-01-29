@@ -17,7 +17,6 @@
 //////////////////////////////////////////////////////////////////////////
 'use strict'
 
-const BigNumber = require('bignumber.js')
 const util = require('util')
 util.inspect.styles.pyobject = 'italic'
 
@@ -66,10 +65,11 @@ _etc.python_object_type = _etc.python_object_type()
 _etc.default_serializer = (type, obj) => _local.serializers[type](type, obj)
 
 _local.serializers = {
-	[_etc.python_object_type.INTEGER]: (type, obj) => new BigNumber(obj),
+	[_etc.python_object_type.INTEGER]: (type, obj) => BigInt(obj),
 	[_etc.python_object_type.COMPLEX]: (type, obj) => new _etc.python_types.Complex(obj[0], obj[1]),
 	[_etc.python_object_type.TUPLE]: (type, obj) => new _etc.python_types.Tuple(obj),
 	[_etc.python_object_type.DICTIONARY]: (type, obj) => _etc.python_types.Dictionary(obj),
+	[_etc.python_object_type.SET]: (type, obj) => _etc.python_types.Set(obj),
 	[_etc.python_object_type._JS_FUNCTION]: (type, obj) => _etc.python_types._js_function(obj),
 	[_etc.python_object_type._JS_WRAP]: (type, obj) => _etc.python_types._js_wrap(obj)
 }
@@ -79,9 +79,6 @@ _local.type_formatter = (d, o, obj) => {
 		return `${o.stylize("'" + obj + "'", 'string')}`
 	}
 	else if (_etc.parameter_check.methods.number.f(obj)) {
-		return `${o.stylize(obj, 'number')}`
-	}
-	else if (obj instanceof BigNumber) { //TODO: adjust type for whatever serializer is currently in
 		return `${o.stylize(obj, 'number')}`
 	}
 	else if (_etc.parameter_check.methods.null.f(obj)) {
@@ -179,6 +176,9 @@ _etc.python_types = {
 		}
 
 		return map
+	},
+	Set: (obj) => {
+		return new Set(obj)
 	},
 	_js_function: (ptr) => {
 		//get a normal (non-async) version of the callback_factory
