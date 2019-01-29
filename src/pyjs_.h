@@ -82,11 +82,17 @@ enum PyObjectTarget
 
 namespace pyjs
 {
+	struct MarshallingOptions
+	{
+		bool rawReference = false;
+	};
+
 	std::pair<PyObject*, PyObjectType> Js_ConvertToPython(const Napi::Env env,
 		const Napi::Value val, const std::unique_ptr<const std::vector<Napi::Function>> &filters);
 	Napi::Value Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 		const std::unique_ptr<const std::vector<Napi::Function>> &filters,
-		std::unique_ptr<std::unordered_map<PyObject*,napi_value>>& python_to_javascript_map);
+		std::unique_ptr<std::unordered_map<PyObject*,napi_value>>& python_to_javascript_map,
+		const MarshallingOptions& marshalling_options);
 	Napi::Value Import(const Napi::CallbackInfo &info);
 
 	PyObject* FunctionBridgeRegisterCallback(const Napi::Env& env, Napi::Function f);
@@ -169,7 +175,8 @@ class NapiPyObject : public Napi::ObjectWrap<NapiPyObject>
 		Napi::Value GetAttribute(const Napi::CallbackInfo &info);
 		Napi::Value SetAttribute(const Napi::CallbackInfo &info);
 		Napi::Value IsCallable(const Napi::CallbackInfo &info);
-		std::pair<PyObject*,PyObject*> ProcessFunctionCallArguments(const Napi::CallbackInfo &info);
+		static std::pair<PyObject*,PyObject*> ProcessFunctionCallArguments(const Napi::CallbackInfo &info);
+		static pyjs::MarshallingOptions ProcessMarshallingOptions(const Napi::Value val);
 		Napi::Value FunctionCallAsync(const Napi::CallbackInfo &info);
 		Napi::Value FunctionCall(const Napi::CallbackInfo &info);
 		Napi::Value CloneReference(const Napi::CallbackInfo &info);

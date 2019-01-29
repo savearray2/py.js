@@ -28,5 +28,8 @@
       "moment": "^2.24.0",
       "node-addon-api": "^1.6.2"
    },
-   "homepage": "https://github.com/savearray2/py.js"
+   "homepage": "https://github.com/savearray2/py.js",
+	"engines" : { 
+		"node" : ">=10.0.0" 
+	}
 }

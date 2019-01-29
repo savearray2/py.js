@@ -76,3 +76,8 @@ def basic_list_j(a):
 
 def basic_dict_j(a):
 	return {'a': 1.3, 'b': 100.1, 'あいうえお': { 7.0:True } } == a
+
+#//////////////////////////////////////////////////////////////////////////
+
+def basic_echo_tester(a):
+	return a

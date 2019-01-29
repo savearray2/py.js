@@ -129,7 +129,7 @@ pyjs.$coerceAs = {
 		}
 		else if (_etc.parameter_check.methods.string.f(num)) {
 			return _etc.marshalling_factory(
-				_pyjs.$coerceAs.Integer(num), 10)
+				_pyjs.$coerceAs.Integer(num))
 		}
 		else
 			throw Error("Unknown type. Unable to coerce as integer.")

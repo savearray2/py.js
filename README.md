@@ -39,6 +39,14 @@ pio.write_image(fig, 'image.png')
 console.log(chalk`{cyan Success:} Chart saved!`)
 ```
 
+#### Recommended Configuration
+
+* Node.js >= v10.0.0
+* Python >= v3.5
+* C++14 compatible compiler, or better
+
+Note: *x86 and ARM architectures have yet to be tested.*
+
 #### Current Testing Matrix
 
 ##### Linux
@@ -53,4 +61,6 @@ console.log(chalk`{cyan Success:} Chart saved!`)
 ##### Windows
 * Windows 10, Node.js 10 LTS, Python 3.7, MSVS 2015 (x64)
 * Windows 10, Node.js 11, Python 3.7, MSVS 2015 (x64)
+
+*See our build tests here: [Linux & Mac](https://travis-ci.org/savearray2/py.js), [Windows](https://ci.appveyor.com/project/savearray2/py-js).*
 

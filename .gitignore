@@ -90,3 +90,6 @@ local/
 
 #Python pyenv
 .python-version
+
+#Disable package-lock for dev
+package-lock.json

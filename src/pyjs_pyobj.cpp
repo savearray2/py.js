@@ -91,7 +91,8 @@ Napi::Value NapiPyObject::GetPythonTypeObject(const Napi::CallbackInfo &info)
 	auto map = std::unique_ptr<std::unordered_map<PyObject*,napi_value>>
 		(new std::unordered_map<PyObject*,napi_value>());
 	auto res = pyjs::Py_ConvertToJavascript(env, type,
-		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);
+		pyjs::PyjsConfigurationOptions::GetSerializationFilters(),
+		map, pyjs::MarshallingOptions());
 
 	Py_XDECREF(type);
 
@@ -162,8 +163,11 @@ Napi::Value NapiPyObject::GetAttribute(const Napi::CallbackInfo &info)
 
 	auto map = std::unique_ptr<std::unordered_map<PyObject*,napi_value>>
 		(new std::unordered_map<PyObject*,napi_value>());
+	
+	//Use info[1] for marshalling options
 	auto res = pyjs::Py_ConvertToJavascript(env, attr,
-		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);
+		pyjs::PyjsConfigurationOptions::GetSerializationFilters(),
+		map, NapiPyObject::ProcessMarshallingOptions(info[1]));
 	
 	Py_XDECREF(attr);
 
@@ -263,9 +267,28 @@ std::pair<PyObject*,PyObject*> NapiPyObject::ProcessFunctionCallArguments(const 
 	return std::make_pair(args, dict);
 }
 
+pyjs::MarshallingOptions NapiPyObject::ProcessMarshallingOptions(const Napi::Value val)
+{
+	if (val.IsNull())
+	{
+		//Default options
+		return pyjs::MarshallingOptions();
+	}
+
+	Napi::Object obj = val.ToObject();
+	pyjs::MarshallingOptions mo = {
+		.rawReference = obj.Get("getReference").ToBoolean().Value()
+	};
+
+	return mo;
+}
+
 Napi::Value NapiPyObject::FunctionCallAsync(const Napi::CallbackInfo &info)
 {
 	Napi::Env env = info.Env();
+	Napi::EscapableHandleScope scope(env);
+
+	//info[0] & info[1] are used for (args, kwargs)
 	auto pair = NapiPyObject::ProcessFunctionCallArguments(info);
 	if (!pair.first)
 		return env.Undefined();
@@ -294,7 +317,7 @@ Napi::Value NapiPyObject::FunctionCallAsync(const Napi::CallbackInfo &info)
 		});
 	}
 
-	return env.Undefined();
+	return scope.Escape(napi_value(env.Undefined()));
 }
 
 Napi::Value NapiPyObject::FunctionCall(const Napi::CallbackInfo &info)
@@ -302,6 +325,7 @@ Napi::Value NapiPyObject::FunctionCall(const Napi::CallbackInfo &info)
 	Napi::Env env = info.Env();
 	Napi::EscapableHandleScope scope(env);
 
+	//info[0] & info[1] are used for (args, kwargs)
 	auto pair = NapiPyObject::ProcessFunctionCallArguments(info);
 	if (!pair.first)
 		return env.Undefined();
@@ -316,10 +340,25 @@ Napi::Value NapiPyObject::FunctionCall(const Napi::CallbackInfo &info)
 	Py_DECREF(args);
 	Py_DECREF(dict);
 
+	pyjs::MarshallingOptions mo = 
+		NapiPyObject::ProcessMarshallingOptions(info[2]);
+
+	if (mo.rawReference)
+	{
+		//Should we send this as an object type?
+		Napi::Value napiValue = NapiPyObject::NewInstance(env, {});
+		NapiPyObject* npo = Napi::ObjectWrap<NapiPyObject>::Unwrap(napiValue.As<Napi::Object>());
+		npo->SetPyObject(env, retValue); //NapiPyObject now managing memory for retValue
+		return scope.Escape(napi_value(napiValue));
+	}
+
 	auto map = std::unique_ptr<std::unordered_map<PyObject*,napi_value>>
 		(new std::unordered_map<PyObject*,napi_value>());
+
+	//Use info[2] for marshalling options.
 	auto napiValue = pyjs::Py_ConvertToJavascript(env, retValue,
-		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);
+		pyjs::PyjsConfigurationOptions::GetSerializationFilters(),
+		map, mo);
 
 	Py_DECREF(retValue);
 

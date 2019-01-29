@@ -128,6 +128,10 @@ Now when you run your Node.js script from the folder you have designated, py.js 
 
 .
 
+### Limitations
+
+.
+
 ---
 
 ## API List (Subject to change)

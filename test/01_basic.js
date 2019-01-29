@@ -20,23 +20,25 @@ const path = require('path');
 const p = require('..')
 const assert = require('chai').assert
 
-let t = describe('pyjs basic functions', function() {
-	describe('#init()', function() {
-		it('should not throw', function() {
-			assert.doesNotThrow(() => p.init({
-				pythonPath: 
-					`${path.join(process.cwd(), 'test', 'helpers')}`
-			}))
-		})
+map_to_object = o => {
+	let obj = {}
+	o.forEach((v,k) => {
+		if (v instanceof Map)
+			obj[k] = map_to_object(v)
+		else
+			obj[k] = v
 	})
+	return obj
+}
 
-	describe('#import("01_basic")', function() {
+describe('pyjs: basic functions', function() {
+	describe('[pyjs] #import("01_basic")', function() {
 		it('should not throw', function() {
 			assert.doesNotThrow(() => p.import('01_basic'))
 		})
 	})
 
-	describe('#base()', function() {
+	describe('[pyjs] #base()', function() {
 		it('should not throw', function() {
 			assert.doesNotThrow(p.base)
 		})
@@ -54,7 +56,7 @@ let t = describe('pyjs basic functions', function() {
 		})
 	})
 
-	describe('$coerceAs', function() {
+	describe('[pyjs] $coerceAs', function() {
 		it('should exist', function() {
 			assert.exists(p.$coerceAs)
 		})
@@ -250,9 +252,40 @@ let t = describe('pyjs basic functions', function() {
 			))
 		})
 	})
-})
 
-t.afterAll(() => {
-	p.finalize()
-})
+	describe('[js->py->js] echo testing', function() {
+		it('01_basic#basic_echo_tester(null)', function() {
+			assert.strictEqual(null, p.import('01_basic').basic_echo_tester(null))
+		})
 
+		it('01_basic#basic_echo_tester(undefined) -> null', function() {
+			assert.strictEqual(null, p.import('01_basic').basic_echo_tester(undefined))
+		})
+
+		it('01_basic#basic_echo_tester(true)', function() {
+			assert.strictEqual(true, p.import('01_basic').basic_echo_tester(true))
+		})
+
+		it('01_basic#basic_echo_tester(false)', function() {
+			assert.strictEqual(false, p.import('01_basic').basic_echo_tester(false))
+		})
+
+		it('01_basic#basic_echo_tester(1)', function() {
+			assert.strictEqual(1, p.import('01_basic').basic_echo_tester(1))
+		})
+
+		it('01_basic#basic_echo_tester("abcd")', function() {
+			assert.strictEqual("abcd", p.import('01_basic').basic_echo_tester("abcd"))
+		})
+
+		it('01_basic#basic_echo_tester([1,2,3,"あ"])', function() {
+			assert.deepStrictEqual([1,2,3,'あ'], p.import('01_basic').basic_echo_tester([1,2,3,'あ']))
+		})
+
+		it('01_basic#basic_echo_tester({a: 1, b: 2, c: {d: true}})', function() {
+			let obj = {a: 1, b: 2, c: {d: true}}
+			let map = p.import('01_basic').basic_echo_tester(obj)
+			assert.deepStrictEqual(obj, map_to_object(map))
+		})
+	})
+})

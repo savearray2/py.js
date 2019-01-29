@@ -198,6 +198,7 @@ _local.object_attributes = {
 		$isCallable: (t) => t.$isCallable,
 		$isClass: (t) => t.$isClass,
 		$getType: (t) => t.$getType,
+		$newMode: (t) => t.$newMode,
 		$getMode: (t) => t.$getMode,
 		$mode: (t) => t.$mode,
 		//Async handler
@@ -286,9 +287,15 @@ _local.marshalling_helper = (obj) => {
 	
 	return _local._pyjs.$GetMarshaledObject(obj)
 }
+_local.marshalling_option_helper = ({getReference}) => {
+	return { 
+		getReference
+	}
+}
 _local.default_marshalling_modes = {
 	attributeCheck: true,
-	asyncOverride: false
+	asyncOverride: false,
+	getReference: false
 }
 
 _local.default_hidden_marshalling_modes = {
@@ -299,7 +306,17 @@ _local.default_hidden_marshalling_modes = {
 // Marshalling Proxy & Factory
 ////////////////////////////////////////////
 
-_etc.marshalling_factory = (obj) =>　{
+_etc.marshalling_factory_cloner = (obj, {_mode, _hidden_mode}) => {
+	let lmo = obj[_local.marshaled_object_tag]
+	if (lmo === undefined)
+		throw Error('Internal Error.')
+	
+	let _proxy = _etc.marshalling_factory(lmo, 
+		{ _mode, _hidden_mode })
+	return _proxy
+}
+
+_etc.marshalling_factory = (obj, modes) =>　{
 
 	//let lmo = obj[_local.marshaled_object_tag]
 	//if (lmo !== undefined)
@@ -370,7 +387,8 @@ _etc.marshalling_factory = (obj) =>　{
 						return t.py.FunctionCallAsync(p, p2)
 				}
 				else {
-					return t.py.FunctionCall(p, p2)
+					return t.py.FunctionCall(p, p2,
+						_local.marshalling_option_helper(func._mode))
 				}
 			}
 
@@ -411,11 +429,23 @@ _etc.marshalling_factory = (obj) =>　{
 	}
 	func.$getType = () => _etc.marshalling_factory(
 		func.py.GetPythonTypeObject())
-	func._mode = Object.assign({}, _local.default_marshalling_modes)
-	func._hidden_mode = Object.assign({}, _local.default_hidden_marshalling_modes)
-	func.$mode = ({ attributeCheck = func._mode.attributeCheck, asyncOverride = func._mode.asyncOverride } = {}) => {
-			func._mode.attributeCheck = attributeCheck,
+
+	if (modes !== undefined)
+	{
+		func._mode = Object.assign({}, modes._mode)
+		func._hidden_mode = Object.assign({}, modes._hidden_mode)
+	}
+	else
+	{
+		func._mode = Object.assign({}, _local.default_marshalling_modes)
+		func._hidden_mode = Object.assign({}, _local.default_hidden_marshalling_modes)
+	}
+	
+	func.$mode = ({ attributeCheck = func._mode.attributeCheck, asyncOverride = func._mode.asyncOverride,
+		getReference = func._mode.getReference } = {}) => {
+			func._mode.attributeCheck = attributeCheck
 			func._mode.asyncOverride = asyncOverride
+			func._mode.getReference = getReference
 			return func._p
 	}
 	func.$hidden_mode = ({ explicitAsync = func._hidden_mode.explicitAsync, callback = undefined } = {}) => {
@@ -424,7 +454,15 @@ _etc.marshalling_factory = (obj) =>　{
 		return func._p
 	}
 	func.$read_only_hidden_mode = ({explicitAsync, callback}) => {
-		return { explicitAsync,  callback}
+		return { explicitAsync,  callback }
+	}
+	func.$newMode = (modes = {}) => {
+		let np = _etc.marshalling_factory_cloner(func._p, 
+			{
+				_mode: func._mode,
+				_hidden_mode: func._hidden_mode
+			})
+		return np.$mode(modes)
 	}
 	//Display current modes and hidden (non-internal use) modes we want the user to see.
 	func.$getMode = () => Object.assign(Object.assign({}, func._mode), func.$read_only_hidden_mode(func._hidden_mode))
@@ -439,19 +477,19 @@ _etc.marshalling_factory = (obj) =>　{
 			else if (k === util.inspect.custom)
 			{
 				let o_type = t.py.GetObjectType()
-				let name = t.py.GetAttribute('__name__')
-				let c = t.py.GetAttribute('__class__')
-				if (c !== undefined) c = c.GetAttribute('__name__')
+				let name = t.py.GetAttribute('__name__', null)
+				let c = t.py.GetAttribute('__class__', null)
+				if (c !== undefined) c = c.GetAttribute('__name__', null)
 
 				if (c === undefined && o_type == _etc.python_object_type.OBJECT) {
 					let type = t.py.GetPythonTypeObject()
 
 					if (name === undefined) {
-						name = type.GetAttribute('__name__')
+						name = type.GetAttribute('__name__', null)
 					}
 
-					c = type.GetAttribute('__class__')
-					if (c !== undefined) c = c.GetAttribute('__name__')
+					c = type.GetAttribute('__class__', null)
+					if (c !== undefined) c = c.GetAttribute('__name__', null)
 					if (c === '__class__') c = "object"
 				}
 					
@@ -507,11 +545,14 @@ _etc.marshalling_factory = (obj) =>　{
 			else if (_etc.parameter_check.methods.string.f(k)) {
 				if (func._mode.attributeCheck) {
 					if (t.py.GetAttributeList().includes(k)) {
-						return _etc.marshalling_factory(t.py.GetAttribute(k))
+						return _etc.marshalling_factory(
+							t.py.GetAttribute(k, 
+								_local.marshalling_option_helper(func._mode)))
 					}
 				}
 				else
-					return _etc.marshalling_factory(t.py.GetAttribute(k))
+					return _etc.marshalling_factory(t.py.GetAttribute(k, 
+						_local.marshalling_option_helper(func._mode)))
 			}
 
 			return undefined

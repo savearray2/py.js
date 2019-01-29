@@ -91,9 +91,10 @@ static void node_to_python_message_handler(uv_async_t* _handle)
 
 					auto map = std::unique_ptr<std::unordered_map<PyObject*,napi_value>>
 						(new std::unordered_map<PyObject*,napi_value>());
-							
+
 					auto js = pyjs::Py_ConvertToJavascript(env, ret,
-						pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);
+						pyjs::PyjsConfigurationOptions::GetSerializationFilters(),
+						map, pyjs::MarshallingOptions());
 
 					Py_DECREF(ret);
 

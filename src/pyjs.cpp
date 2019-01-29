@@ -232,7 +232,7 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 			{
 				key = PyUnicode_FromString(napiVal.As<Napi::String>().Utf8Value().c_str()); //PyUnicode_FromString (New)	
 			}
-			
+
 			napi_value napi_val;
 			NAPI_DIRECT_FUNC(napi_get_property, napi_obj, napi_ele, &napi_val);
 			PyObject* res = pyjs::Js_ConvertToPython(env, Napi::Value(env, napi_val), filters).first;
@@ -264,7 +264,8 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 
 Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 	const std::unique_ptr<const std::vector<Napi::Function>>& filters,
-	std::unique_ptr<std::unordered_map<PyObject*,napi_value>>& python_to_javascript_map)
+	std::unique_ptr<std::unordered_map<PyObject*,napi_value>>& python_to_javascript_map,
+	const pyjs::MarshallingOptions& marshalling_options)
 {
 	PY_CHECK_START();
 	Napi::Value napiValue = env.Null();
@@ -374,7 +375,8 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 		{
 			PyObject* itm = PyTuple_GET_ITEM(obj, i); //PyTuple_GET_ITEM (Borrowed)
 			Napi::Value val;
-			val = Py_ConvertToJavascript(env, itm, filters, python_to_javascript_map);
+			val = Py_ConvertToJavascript(env, itm, filters, 
+				python_to_javascript_map, marshalling_options);
 
 			val = NapiPyObject::serialization_callback_.Call(
 			{
@@ -411,7 +413,8 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 		for (Py_ssize_t i = 0; i < size; i++)
 		{
 			PyObject* itm = PyList_GET_ITEM(obj, i); //PyList_GET_ITEM (Borrowed)
-			Napi::Value val = Py_ConvertToJavascript(env, itm, filters, python_to_javascript_map);
+			Napi::Value val = Py_ConvertToJavascript(env, itm, filters,
+				python_to_javascript_map, marshalling_options);
 
 			val = NapiPyObject::serialization_callback_.Call(
 			{
@@ -447,8 +450,10 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 
 		while (PyDict_Next(obj, &pos, &key, &val)) //PyDict_Next (Borrow)
 		{
-			Napi::Value n_key = Py_ConvertToJavascript(env, key, filters, python_to_javascript_map);
-			Napi::Value n_val = Py_ConvertToJavascript(env, val, filters, python_to_javascript_map);
+			Napi::Value n_key = Py_ConvertToJavascript(env, key, filters, 
+				python_to_javascript_map, marshalling_options);
+			Napi::Value n_val = Py_ConvertToJavascript(env, val, filters, 
+				python_to_javascript_map, marshalling_options);
 
 			auto pair = Napi::Object::New(env);
 			pair.Set("key", n_key);
@@ -650,7 +655,8 @@ static Napi::Value Import(const Napi::CallbackInfo &info)
 		(new std::unordered_map<PyObject*,napi_value>());
 
 	Napi::Value napiValue = pyjs::Py_ConvertToJavascript(env, module,
-		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);
+		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map,
+		pyjs::MarshallingOptions());
 
 	Py_XDECREF(module);
 
@@ -686,7 +692,8 @@ static Napi::Value EvalHelper(const Napi::CallbackInfo &info, int type)
 	auto map = std::unique_ptr<std::unordered_map<PyObject*,napi_value>>
 		(new std::unordered_map<PyObject*,napi_value>());
 	auto res = pyjs::Py_ConvertToJavascript(env, obj,
-		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);
+		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), 
+		map, pyjs::MarshallingOptions());
 
 	Py_XDECREF(obj);
 
@@ -715,7 +722,8 @@ static Napi::Value Global(const Napi::CallbackInfo &info)
 		(new std::unordered_map<PyObject*,napi_value>());	
 
 	return pyjs::Py_ConvertToJavascript(env, __py__main__module_,
-		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);	
+		pyjs::PyjsConfigurationOptions::GetSerializationFilters(), 
+		map, pyjs::MarshallingOptions());	
 }
 
 Napi::Object InstanceInformation(const Napi::CallbackInfo &info)
@@ -787,7 +795,8 @@ static PyObject* PyCapsuleNodeJSInterfaceFunctionCall(PyObject* self, PyObject* 
 					(new std::unordered_map<PyObject*,napi_value>());
 						
 				auto js = pyjs::Py_ConvertToJavascript(env, cb_args,
-					pyjs::PyjsConfigurationOptions::GetSerializationFilters(), map);
+					pyjs::PyjsConfigurationOptions::GetSerializationFilters(),
+					map, pyjs::MarshallingOptions());
 
 				Py_DECREF(cb_args); //We can get rid of args now.
 
