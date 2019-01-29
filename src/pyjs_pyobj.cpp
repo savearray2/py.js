@@ -405,16 +405,12 @@ Napi::Value NapiPyObject::GetMarshaledObject(const Napi::CallbackInfo &info)
 
 NapiPyObject::NapiPyObject(const Napi::CallbackInfo &info) : Napi::ObjectWrap<NapiPyObject>(info)
 {
-	//Napi::Env env = info.Env();
-	//Napi::HandleScope scope(env);
 	container_ = new NapiPyObjectContainer();
 }
 
 Napi::Object NapiPyObject::NewInstance(Napi::Env env, const std::vector<napi_value>& args)
 {
-	//Napi::EscapableHandleScope scope(env);
 	Napi::Object obj = NapiPyObject::constructor_.New(args);
-	//return scope.Escape(napi_value(obj)).ToObject();
 	return obj;
 }
 

@@ -1,3 +1,7 @@
+branches:
+  only:
+    - testing
+
 # Test against the latest version of this Node.js version
 environment:
   matrix:

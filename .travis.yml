@@ -1,6 +1,7 @@
 matrix:
   include:
-    - os: linux
+    - if: branch = testing
+      os: linux
       compiler: gcc
       dist: xenial
       name: "Linux (Ubuntu Xenial 16.04 LTS): Node LTS & g++8 & python3 Current"
@@ -60,7 +61,8 @@ matrix:
         - |- 
           node test/helpers/99_version.js
         - npm test
-    - os: linux
+    - if: branch = testing
+      os: linux
       compiler: gcc
       dist: xenial
       name: "Linux (Ubuntu Xenial 16.04 LTS): Node Current & g++8 & python3 Current"
@@ -118,7 +120,8 @@ matrix:
         - |- 
           node test/helpers/99_version.js
         - npm test
-    - os: linux
+    - if: branch = testing
+      os: linux
       compiler: gcc
       dist: trusty
       name: "Linux (Ubuntu Trusty 14.04 LTS): Node LTS & g++6 & python 3.5"
@@ -176,7 +179,8 @@ matrix:
         - |- 
           node test/helpers/99_version.js
         - npm test
-    - os: osx
+    - if: branch = testing
+      os: osx
       osx_image: xcode10.1
       compiler: clang
       name: "OSX (10.13): Node Current & python3 Current"

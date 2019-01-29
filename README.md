@@ -1,10 +1,11 @@
 # py.js
 
-[![Build status](https://ci.appveyor.com/api/projects/status/e21hoqmy6lgre65w/branch/master?svg=true)](https://ci.appveyor.com/project/savearray2/py-js/branch/master) [![Build Status](https://travis-ci.org/savearray2/py.js.svg?branch=master)](https://travis-ci.org/savearray2/py.js)
+[![Build status](https://ci.appveyor.com/api/projects/status/e21hoqmy6lgre65w/branch/testing?svg=true)](https://ci.appveyor.com/project/savearray2/py-js/branch/testing) [![Build Status](https://travis-ci.org/savearray2/py.js.svg?branch=master)](https://travis-ci.org/savearray2/py.js)
 
 Node.js/Python Bridge; Node.js-hosted Python.
 
 Documentation can be found [here](https://savearray2.github.io/py.js/).
+Click here for [here](examples/README.md) a few basic examples.
 
 *This project is currently a WIP (work-in-progress) and is currently in **alpha**. Significant changes are to come.*
 
