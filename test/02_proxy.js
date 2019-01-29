@@ -66,6 +66,11 @@ let t = describe('pyjs: proxy functions', function() {
 			assert.isFalse(p.$coerceAs.int(1)
 				.$getMode().getReference)
 		})
+
+		it('proxy#$getMode(getReferenceOnIterate) returns false', function() {
+			assert.isFalse(p.$coerceAs.int(1)
+				.$getMode().getReferenceOnIterate)
+		})
 	})
 
 	describe('[proxy] mode setting', function() {
@@ -82,6 +87,11 @@ let t = describe('pyjs: proxy functions', function() {
 		it('proxy#$mode(getReference->true)', function() {
 			let c = p.$coerceAs.int(1).$mode({getReference: true})
 			assert.isTrue(c.$getMode().getReference)
+		})
+
+		it('proxy#$mode(getReferenceOnIterate->true)', function() {
+			let c = p.$coerceAs.int(1).$mode({getReferenceOnIterate: true})
+			assert.isTrue(c.$getMode().getReferenceOnIterate)
 		})
 
 		it('proxy#$mode({}) returns proxy', function() {

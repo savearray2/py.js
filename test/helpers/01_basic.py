@@ -61,6 +61,25 @@ def basic_class():
 			return self.i
 	return bclass
 
+def basic_exception():
+	raise TypeError('basic exception')
+
+def basic_iterator(c):
+	class TestIterable:
+		def __init__(self, count):
+			self.count = count
+		def __iter__(self):
+			self.counter = 0
+			return self
+		def __next__(self):
+			if self.counter >= self.count:
+				raise StopIteration
+			else:
+				self.counter += 1
+				return { 'updated_count': self.counter + 100, 'count': self.counter }
+
+	return TestIterable(c)
+
 #//////////////////////////////////////////////////////////////////////////
 
 # JS->Py Tests

@@ -20,6 +20,34 @@
 #include "napi_callback.hpp"
 
 ////////////////////////////////////////////
+// Exceptions
+////////////////////////////////////////////
+
+void pyjs_utils::ThrowPythonException(Napi::Env env)
+{
+	auto p_ex = pyjs_utils::GetPythonException();
+	auto napiEx = NapiPyObject::NewInstance(env, {});
+	NapiPyObject* npo = Napi::ObjectWrap<NapiPyObject>::Unwrap(napiEx.As<Napi::Object>());
+	npo->SetPyObject(env, p_ex.second);
+	npo->SetObjectType(PyObjectType::Python_Exception);
+	Py_INCREF(p_ex.second); //Clone.
+
+	Napi::Object exObj = Napi::Object::New(env);
+	exObj.Set("message", p_ex.first);
+	exObj.Set("exception", napiEx);
+
+	Napi::Value ex = NapiPyObject::serialization_callback_.Call(
+	{
+		Napi::Number::New(env, PyObjectType::Python_Exception),
+		exObj
+	});
+
+
+	NAPI_DIRECT_START(env);
+	NAPI_DIRECT_FUNC(napi_throw, ex);
+}
+
+////////////////////////////////////////////
 // Debug?
 ////////////////////////////////////////////
 

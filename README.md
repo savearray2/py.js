@@ -25,8 +25,8 @@ let pio = plotly.io
 
 let [x,y,colors,sz] = 
 	[0,0,0,0].map(() => 
-		np.random.rand(p.$coerceAs.int(100)))
-sz = sz.$mul(p.$coerceAs.int(30))
+		np.random.rand(100n))
+sz = sz.__mul__(30n)
 let fig = go.Figure()
 fig.add_scatter.$apply({
 	x: x, y: y, mode: 'markers',
@@ -42,7 +42,7 @@ console.log(chalk`{cyan Success:} Chart saved!`)
 
 #### Recommended Configuration
 
-* Node.js >= v10.0.0
+* Node.js >= v10.4.0
 * Python >= v3.5
 * C++14 compatible compiler, or better
 

@@ -31,7 +31,7 @@
 // "LICENSE" for more details.
 //////////////////////////////////////////////////////////////////////////
 
-std::string pyjs_utils::GetPythonException()
+std::pair<std::string,PyObject*> pyjs_utils::GetPythonException()
 {
 	PyObject *ptype, *pvalue, *ptraceback;
 	PyErr_Fetch(&ptype, &pvalue, &ptraceback);
@@ -39,10 +39,10 @@ std::string pyjs_utils::GetPythonException()
 
 	if(pvalue == NULL)
 	{
-		return "Exception thrown, but no symbolic data found.";
+		return std::make_pair("Exception thrown, but no symbolic data found.", ptype);
 	}
 
-	std::string msg = "[Python Error] => ";
+	std::string msg = "";
 
 	if (ptype != NULL)
 	{
@@ -71,7 +71,6 @@ std::string pyjs_utils::GetPythonException()
 		Py_DECREF(module_name);
 
 		pyth_func = PyObject_GetAttrString(pyth_module, "format_exception"); //PyObject_GetAttrString (New)
-		Py_DECREF(pyth_func);
 		Py_DECREF(pyth_module);
 
 		if (pyth_func)
@@ -111,10 +110,5 @@ std::string pyjs_utils::GetPythonException()
 		}
 	}
 
-	return msg;
-}
-
-void pyjs_utils::ThrowPythonException(Napi::Env env)
-{
-	NAPI_ERROR(env, pyjs_utils::GetPythonException());
+	return std::make_pair(msg, pvalue);
 }

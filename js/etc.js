@@ -51,6 +51,7 @@ _etc.python_object_type = () => {
 		'TYPE',
 		'_JS_FUNCTION',
 		'_JS_WRAP',
+		'PYTHON_EXCEPTION',
 		'UNSUPPORTED'
 	]
 
@@ -70,6 +71,7 @@ _local.serializers = {
 	[_etc.python_object_type.TUPLE]: (type, obj) => new _etc.python_types.Tuple(obj),
 	[_etc.python_object_type.DICTIONARY]: (type, obj) => _etc.python_types.Dictionary(obj),
 	[_etc.python_object_type.SET]: (type, obj) => _etc.python_types.Set(obj),
+	[_etc.python_object_type.PYTHON_EXCEPTION]: (type, obj) => _etc.python_types.Exception(obj),
 	[_etc.python_object_type._JS_FUNCTION]: (type, obj) => _etc.python_types._js_function(obj),
 	[_etc.python_object_type._JS_WRAP]: (type, obj) => _etc.python_types._js_wrap(obj)
 }
@@ -180,6 +182,13 @@ _etc.python_types = {
 	Set: (obj) => {
 		return new Set(obj)
 	},
+	Exception: (obj) => {
+		let ex = _local._pyjs.pyjs
+			.exceptions().PythonException
+		let ret = new ex(obj.message, 
+			_etc.marshalling_factory(obj.exception))
+		return ret
+	},
 	_js_function: (ptr) => {
 		//get a normal (non-async) version of the callback_factory
 		//we can't invoke otherwise (we'd get undefined back in FunctionCallAsync)
@@ -197,6 +206,7 @@ _local.object_attributes = {
 		//Proxy & Marshalling Helpers
 		$isCallable: (t) => t.$isCallable,
 		$isClass: (t) => t.$isClass,
+		$isIterable: (t) => t.$isIterable,
 		$getType: (t) => t.$getType,
 		$newMode: (t) => t.$newMode,
 		$getMode: (t) => t.$getMode,
@@ -239,6 +249,9 @@ _local.object_attributes = {
 }
 
 _local.marshaled_object_tag = Symbol('marshaled obj')
+_etc.get_raw_object = (obj) => {
+	return obj[_local.marshaled_object_tag]
+}
 _etc.unmarshalling_filter = (obj) => {
 	let lmo = obj[_local.marshaled_object_tag]
 	if (lmo !== undefined)
@@ -295,7 +308,8 @@ _local.marshalling_option_helper = ({getReference}) => {
 _local.default_marshalling_modes = {
 	attributeCheck: true,
 	asyncOverride: false,
-	getReference: false
+	getReference: false,
+	getReferenceOnIterate: false
 }
 
 _local.default_hidden_marshalling_modes = {
@@ -405,6 +419,7 @@ _etc.marshalling_factory = (obj, modes) =>　{
 	func.$isCallable = () => func.py.IsCallable()
 	func.$isClass = () => func.py.GetObjectType() 
 		== _etc.python_object_type.TYPE
+	func.$isIterable = () => func.py.GetAttributeList().includes('__iter__')
 	func.$_get_special_attributes = (t) => {
 		let m = new Map(Object.entries(_local.object_attributes.all))
 		let o_type = t.py.GetObjectType()
@@ -442,10 +457,11 @@ _etc.marshalling_factory = (obj, modes) =>　{
 	}
 	
 	func.$mode = ({ attributeCheck = func._mode.attributeCheck, asyncOverride = func._mode.asyncOverride,
-		getReference = func._mode.getReference } = {}) => {
+		getReference = func._mode.getReference, getReferenceOnIterate = func._mode.getReferenceOnIterate } = {}) => {
 			func._mode.attributeCheck = attributeCheck
 			func._mode.asyncOverride = asyncOverride
 			func._mode.getReference = getReference
+			func._mode.getReferenceOnIterate = getReferenceOnIterate
 			return func._p
 	}
 	func.$hidden_mode = ({ explicitAsync = func._hidden_mode.explicitAsync, callback = undefined } = {}) => {
@@ -534,9 +550,32 @@ _etc.marshalling_factory = (obj, modes) =>　{
 			}
 			//for of ('values' or anything custom defined of obj)
 			else if (k === Symbol.iterator) {
-				return function*() {
-					for (let v of t.py.GetAttributeList())
-						yield v
+				if (t.py.GetAttributeList().includes('__iter__')) {
+					return function*() {
+						let next = func._p.__iter__().__next__
+						if (func._mode.getReferenceOnIterate) {
+							next = next.$newMode({getReference: true})
+						}
+						let pe = _local._pyjs.pyjs.exceptions().PythonException
+						let hasItems = true
+						while (hasItems) {
+							try {
+								yield _etc.marshalling_factory(next())
+							}
+							catch (err) {
+								if (err instanceof pe
+									&& err.IsStopIterationException()) {
+									hasItems = false
+								}
+								else {
+									throw err
+								}
+							}
+						}
+					}
+				}
+				else {
+					return function*() {}
 				}
 			}
 			else if (func.$_get_special_attributes(t).has(k)) {

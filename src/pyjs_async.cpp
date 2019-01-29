@@ -85,8 +85,8 @@ static void node_to_python_message_handler(uv_async_t* _handle)
 				{
 					if (ret == NULL)
 					{
-						throw std::runtime_error("Error in async callback:\n" 
-							+ pyjs_utils::GetPythonException());
+						throw std::runtime_error("Error in async callback:\n" );
+							//+ pyjs_utils::GetPythonException());
 					}
 
 					auto map = std::unique_ptr<std::unordered_map<PyObject*,napi_value>>

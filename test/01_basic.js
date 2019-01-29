@@ -220,6 +220,37 @@ describe('pyjs: basic functions', function() {
 		})
 	})
 
+	describe('[py->js] exception to exception', function() {
+		it('01_basic#basic_exception() throws a TypeError', function() {
+			let threwError = false
+			try {
+				p.import('01_basic').basic_exception()
+			}
+			catch (err) {
+				if (err instanceof p.exceptions().PythonException)
+					if (err.py_name === 'TypeError')
+						threwError = true
+			}
+
+			assert.isTrue(threwError)
+		})
+	})
+
+	describe('[py->js] iterator to iterator', function() {
+		it('01_basic#basic_iterator(100) returns an interable', function() {
+			assert.isTrue(p.import('01_basic').basic_iterator(100).$isIterable())
+		})
+
+		it('01_basic#basic_iterator(100) iterates as expected', function() {
+			let count = 1n
+			for (let i of p.import('01_basic').basic_iterator(100)) {
+				assert.isTrue(i.get('updated_count') === (count + 100n))
+				assert.isTrue(i.get('count') === count)
+				count++
+			}
+		})
+	})
+
 	describe('[js->py] null or undefined to none', function() {
 		it('01_basic#basic_none_j(null) returns true', function() {
 			assert.isTrue(p.import('01_basic').basic_none_j(null))

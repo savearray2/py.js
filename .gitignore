@@ -93,3 +93,6 @@ local/
 
 #Disable package-lock for dev
 package-lock.json
+
+#nvm
+.nvmrc

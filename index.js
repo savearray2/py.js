@@ -24,7 +24,6 @@ const path = require('path')
 
 const _pyjs = require('./build/Release/pyjs.node')
 const _etc = require('./js/etc.js')
-
 const _pylib = {}
 
 ////////////////////////////////////////////
@@ -184,6 +183,7 @@ pyjs.init = ({ 	exitHandler: exit_handler,
 	_pylib._callback_factory = _pylib.__pyjs._callback_factory
 	_pyjs._pylib = _pylib
 	_pylib.exit = _pylib.__pyjs._exit
+	_pyjs.pyjs = pyjs
 }
 
 ////////////////////////////////////////////
@@ -252,6 +252,8 @@ pyjs.$DisableProcessSigListeners = () => {
 		pyjs.init = () => {
 			throw Error("py.js has already been initialized.")
 		}
+
+		pyjs.exceptions = require('./js/ex.js')(pyjs, _etc)
 
 		return pyjs
 	}

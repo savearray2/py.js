@@ -71,6 +71,7 @@ enum PyObjectType
 	Type,
 	_JS_Function,
 	_JS_Wrap,
+	Python_Exception,
 	Unsupported
 };
 
@@ -225,7 +226,7 @@ class lock_gil
 namespace pyjs_utils
 {
 	void ThrowPythonException(const Napi::Env env);
-	std::string GetPythonException();
+	std::pair<std::string,PyObject*> GetPythonException();
 
 	unsigned long GetCurrentTimeTicks();
 	std::string GetCurrentThreadID();
