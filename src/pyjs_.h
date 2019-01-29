@@ -84,7 +84,9 @@ namespace pyjs
 {
 	struct MarshallingOptions
 	{
-		bool rawReference = false;
+		MarshallingOptions() : rawReference(false) {}
+		MarshallingOptions(bool raw_reference) : rawReference(raw_reference) {}
+		bool rawReference;
 	};
 
 	std::pair<PyObject*, PyObjectType> Js_ConvertToPython(const Napi::Env env,

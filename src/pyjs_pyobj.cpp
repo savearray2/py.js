@@ -276,9 +276,8 @@ pyjs::MarshallingOptions NapiPyObject::ProcessMarshallingOptions(const Napi::Val
 	}
 
 	Napi::Object obj = val.ToObject();
-	pyjs::MarshallingOptions mo = {
-		.rawReference = obj.Get("getReference").ToBoolean().Value()
-	};
+	pyjs::MarshallingOptions mo = pyjs::MarshallingOptions(
+		obj.Get("getReference").ToBoolean().Value());
 
 	return mo;
 }
