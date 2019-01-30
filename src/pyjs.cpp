@@ -460,16 +460,15 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 			return Napi::Value(env, it->second);
 		}
 
-		auto size = PyDict_Size(obj);
-		NAPI_DIRECT_START(env);
-		napi_value napi_array;
-		NAPI_DIRECT_FUNC(napi_create_array_with_length, size, &napi_array);
+		Napi::Value map = NapiPyObject::serialization_callback_.Call(
+		{
+			Napi::Number::New(env, PyObjectType::Dictionary),
+			env.Null()
+		});
 
-		python_to_javascript_map->insert(std::make_pair(obj, napi_array));
+		python_to_javascript_map->insert(std::make_pair(obj, map));
 
 		Py_ssize_t pos = 0;
-		//Elements may not be contiguous, so add a count for us.
-		Py_ssize_t count = 0;
 		PyObject *key, *val;
 
 		while (PyDict_Next(obj, &pos, &key, &val)) //PyDict_Next (Borrow)
@@ -479,19 +478,16 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 			Napi::Value n_val = Py_ConvertToJavascript(env, val, filters, 
 				python_to_javascript_map, marshalling_options);
 
-			auto pair = Napi::Object::New(env);
-			pair.Set("key", n_key);
-			pair.Set("value", n_val);
-
-			NAPI_DIRECT_FUNC(napi_set_element, napi_array, count++, pair);
-		}
-
-		napiValue = NapiPyObject::serialization_callback_.Call(
+			NapiPyObject::serialization_callback_.Call(
 			{
 				Napi::Number::New(env, PyObjectType::Dictionary),
-				napi_array
-			}
-		);
+				map,
+				n_key,
+				n_val
+			});
+		}
+
+		napiValue = map;
 	}
 	//Set
 	else if (PyAnySet_CheckExact(obj))

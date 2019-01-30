@@ -65,13 +65,13 @@ _etc.python_object_type = () => {
 
 _etc.python_object_type = _etc.python_object_type()
 
-_etc.default_serializer = (type, obj) => _local.serializers[type](type, obj)
+_etc.default_serializer = (type, obj, ...etc) => _local.serializers[type](type, obj, etc)
 
 _local.serializers = {
 	[_etc.python_object_type.INTEGER]: (type, obj) => BigInt(obj),
 	[_etc.python_object_type.COMPLEX]: (type, obj) => new _etc.python_types.Complex(obj[0], obj[1]),
 	//[_etc.python_object_type.TUPLE]: (type, obj) => new _etc.python_types.Tuple(obj),
-	[_etc.python_object_type.DICTIONARY]: (type, obj) => _etc.python_types.Dictionary(obj),
+	[_etc.python_object_type.DICTIONARY]: (type, obj, etc) => _etc.python_types.Dictionary(obj, etc),
 	[_etc.python_object_type.SET]: (type, obj) => _etc.python_types.Set(obj),
 	[_etc.python_object_type.PYTHON_EXCEPTION]: (type, obj) => _etc.python_types.Exception(obj),
 	[_etc.python_object_type._JS_DATETIME]: (type, obj) => _etc.python_types._js_datetime(obj),
@@ -173,17 +173,15 @@ _etc.python_types = {
 			return `${tag}( ${items} )`
 		}
 	},*/
-	Dictionary: (obj) => {
-		let map = new Map()
-		for (let i = 0; i < obj.length; i++) {
-			let pair = obj[i]
-			map.set(
-				_etc.marshalling_factory(pair.key), 
-				_etc.marshalling_factory(pair.value)
-			)
+	Dictionary: (obj, vals) => {
+		if (obj === null) {
+			return new Map()
 		}
 
-		return map
+		obj.set(
+			_etc.marshalling_factory(vals[0]), 
+			_etc.marshalling_factory(vals[1])
+		)
 	},
 	Set: (obj) => {
 		return new Set(obj)

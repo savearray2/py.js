@@ -21,6 +21,8 @@ const assert = require('chai').assert
 const crypto = require('crypto')
 const util = require('util')
 
+const loop_count = 10
+
 getRandom = n => n === undefined ? 
 	parseInt(crypto.randomBytes(4).toString('hex'), 16) :
 	parseInt(crypto.randomBytes(4).toString('hex'), 16) % n
@@ -100,9 +102,9 @@ map_to_object = o => {
 let t = describe('pyjs: complexity testing', function() {
 	describe('[rnd] flat random structure echo test', function() {
 		it('01_basic#basic_echo_tester(), 10 iterations, random arrays', function() {
-			this.slow(700)
+			this.slow(1000)
 
-			for (let i = 0; i < 10; i++)
+			for (let i = 0; i < loop_count; i++)
 			{
 				let echo = p.import('01_basic').basic_echo_tester
 				let arr = array_randomizer(10,20)
@@ -111,9 +113,9 @@ let t = describe('pyjs: complexity testing', function() {
 		})
 
 		it('01_basic#basic_echo_tester(), 10 iterations, random objects', function() {
-			this.slow(2500)
+			this.slow(1000)
 
-			for (let i = 0; i < 10; i++)
+			for (let i = 0; i < loop_count; i++)
 			{
 				let echo = p.import('01_basic').basic_echo_tester
 				let obj = obj_randomizer(10,20)
@@ -125,10 +127,10 @@ let t = describe('pyjs: complexity testing', function() {
 
 	describe('[rnd] deep/complex random structure echo test', function() {
 		it('01_basic#basic_echo_tester(), 10 iterations, random deep structures in array', function() {
-			this.slow(2000)
-			this.timeout(8000)
+			this.slow(1000)
+			this.timeout(3000)
 
-			for (let i = 0; i < 10; i++)
+			for (let i = 0; i < loop_count; i++)
 			{
 				let echo = p.import('01_basic').basic_echo_tester
 				let arr = array_randomizer(5,25, val_grabber([array_randomizer, obj_randomizer]))
@@ -139,10 +141,10 @@ let t = describe('pyjs: complexity testing', function() {
 		})
 
 		it('01_basic#basic_echo_tester(), 10 iterations, random deep structures in object', function() {
-			this.slow(2000)
-			this.timeout(8000)
+			this.slow(1000)
+			this.timeout(3000)
 
-			for (let i = 0; i < 10; i++)
+			for (let i = 0; i < loop_count; i++)
 			{
 				let echo = p.import('01_basic').basic_echo_tester
 				let obj = obj_randomizer(5,25, val_grabber([array_randomizer, obj_randomizer]))

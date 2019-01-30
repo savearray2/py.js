@@ -195,6 +195,7 @@ pyjs.init = ({ 	exitHandler: exit_handler,
 		throw Error("Option 'pythonPath' must be a string.")
 	} 
 	
+	//Possibly best to refactor this, or maybe just let the user decide on the python path.
 	/*if (process.env.PYTHONPATH === undefined
 		&& python_path === undefined) {
 		try {
