@@ -16,11 +16,13 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //////////////////////////////////////////////////////////////////////////
 
+'use strict'
+
 const path = require('path');
 const p = require('..')
 const assert = require('chai').assert
 
-map_to_object = o => {
+let map_to_object = o => {
 	let obj = {}
 	o.forEach((v,k) => {
 		if (v instanceof Map)

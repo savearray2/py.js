@@ -16,12 +16,18 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //////////////////////////////////////////////////////////////////////////
 
+'use strict'
+
 const path = require('path');
 const p = require('..')
 const assert = require('chai').assert
 
 let t = describe('pyjs: proxy functions', function() {
 	describe('[proxy] universal attribute check', function() {
+		it('proxy#$toString exists', function() {
+			assert.exists(p.$coerceAs.int(1).$toString)
+		})
+
 		it('proxy#$isCallable exists', function() {
 			assert.exists(p.$coerceAs.int(1).$isCallable)
 		})
@@ -48,6 +54,22 @@ let t = describe('pyjs: proxy functions', function() {
 
 		it('proxy#$async exists', function() {
 			assert.exists(p.$coerceAs.int(1).$async)
+		})
+
+		it('proxy#$toString() returns string', function() {
+			assert.isString(p.$coerceAs.int(1).$toString())
+		})
+
+		it('proxy#$getType() does not throw', function() {
+			assert.doesNotThrow(p.$coerceAs.int(1).$getType())
+		})
+
+		it('proxy#$isCallable() returns bool', function() {
+			assert.isBoolean(p.$coerceAs.int(1).$isCallable())
+		})
+
+		it('proxy#$isClass() returns bool', function() {
+			assert.isBoolean(p.$coerceAs.int('1').$isClass())
 		})
 	})
 

@@ -18,17 +18,22 @@
 
 'use strict'
 
-const path = require('path');
 const p = require('..')
 const assert = require('chai').assert
 
-before(function() {
-	assert.doesNotThrow(() => p.init({
-		pythonPath: 
-			`${path.join(process.cwd(), 'test', 'helpers')}`
-	}))
-})
+let t = describe('pyjs: async protocol & marshalling node.js functions', function() {
+	describe('[js->py->js] async function call (calling js function from python)', function() {
+		it('05_async#async_function_echo_tester(() => 100n) returns 100n async', function(done) {
+			this.timeout(5000)
+			this.slow(4000)
 
-after(function () {
-	assert.doesNotThrow(() => p.finalize())	
+			let async = p.import('05_async')
+			let remote_function = async.async_function_echo_tester.$async((ret_val) => {
+				assert.strictEqual(100n, ret_val)
+				done()
+			})
+
+			remote_function(() => 100n)
+		})
+	})
 })

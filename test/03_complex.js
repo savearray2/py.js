@@ -16,6 +16,8 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //////////////////////////////////////////////////////////////////////////
 
+'use strict'
+
 const p = require('..')
 const assert = require('chai').assert
 const crypto = require('crypto')
@@ -23,7 +25,7 @@ const util = require('util')
 
 const loop_count = 10
 
-getRandom = n => n === undefined ? 
+let getRandom = n => n === undefined ? 
 	parseInt(crypto.randomBytes(4).toString('hex'), 16) :
 	parseInt(crypto.randomBytes(4).toString('hex'), 16) % n
 
@@ -74,7 +76,7 @@ let obj_randomizer = (min = 5, count = 25, v = val_grabber(), weight = 0) => {
 	return testObj
 }
 
-map_to_object = o => {
+let map_to_object = o => {
 	if (util.isArray(o)) {
 		let arr = []
 		o.forEach((v,k) => {

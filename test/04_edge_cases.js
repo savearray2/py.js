@@ -1,3 +1,23 @@
+//////////////////////////////////////////////////////////////////////////
+//	py.js - Node.js/Python Bridge; Node.js-hosted Python.
+//	Copyright (C) 2019  Michael Brown
+//
+//	This program is free software: you can redistribute it and/or modify
+//	it under the terms of the GNU Affero General Public License as
+//	published by the Free Software Foundation, either version 3 of the
+//	License, or (at your option) any later version.
+//
+//	This program is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//	GNU Affero General Public License for more details.
+//
+//	You should have received a copy of the GNU Affero General Public License
+//	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//////////////////////////////////////////////////////////////////////////
+
+'use strict'
+
 const p = require('..')
 const assert = require('chai').assert
 const crypto = require('crypto')
@@ -5,7 +25,7 @@ const util = require('util')
 
 let rand_int = (min,max) => Math.floor(Math.random() * (max - min + 1) + min)
 
-map_to_object_with_circular_caching = (o, seen_map = new Map(), arr = [], obj = {}) => {
+let map_to_object_with_circular_caching = (o, seen_map = new Map(), arr = [], obj = {}) => {
 	if (util.isArray(o)) {
 		o.forEach((v,k) => {
 			if (seen_map.has(v))
