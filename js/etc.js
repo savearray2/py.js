@@ -49,6 +49,8 @@ _etc.python_object_type = () => {
 		'FUNCTION',
 		'METHOD',
 		'TYPE',
+		'DATETIME',
+		'_JS_DATETIME',
 		'_JS_FUNCTION',
 		'_JS_WRAP',
 		'PYTHON_EXCEPTION',
@@ -68,10 +70,11 @@ _etc.default_serializer = (type, obj) => _local.serializers[type](type, obj)
 _local.serializers = {
 	[_etc.python_object_type.INTEGER]: (type, obj) => BigInt(obj),
 	[_etc.python_object_type.COMPLEX]: (type, obj) => new _etc.python_types.Complex(obj[0], obj[1]),
-	[_etc.python_object_type.TUPLE]: (type, obj) => new _etc.python_types.Tuple(obj),
+	//[_etc.python_object_type.TUPLE]: (type, obj) => new _etc.python_types.Tuple(obj),
 	[_etc.python_object_type.DICTIONARY]: (type, obj) => _etc.python_types.Dictionary(obj),
 	[_etc.python_object_type.SET]: (type, obj) => _etc.python_types.Set(obj),
 	[_etc.python_object_type.PYTHON_EXCEPTION]: (type, obj) => _etc.python_types.Exception(obj),
+	[_etc.python_object_type._JS_DATETIME]: (type, obj) => _etc.python_types._js_datetime(obj),
 	[_etc.python_object_type._JS_FUNCTION]: (type, obj) => _etc.python_types._js_function(obj),
 	[_etc.python_object_type._JS_WRAP]: (type, obj) => _etc.python_types._js_wrap(obj)
 }
@@ -127,7 +130,10 @@ _etc.python_types = {
 			return `${options.stylize('Python Proxy', 'pyobject')} <class ${options.stylize("'complex'", 'string')}> { ${r}${i} }`
 		}
 	},
-	Tuple: class Tuple {
+	//Tuple proxy is not required at this time...
+	//Might add it back in later if the need is there,
+	//or completely remove this code.
+	/*Tuple: class Tuple {
 		constructor(arr) {
 			this.array = arr
 		}
@@ -166,7 +172,7 @@ _etc.python_types = {
 
 			return `${tag}( ${items} )`
 		}
-	},
+	},*/
 	Dictionary: (obj) => {
 		let map = new Map()
 		for (let i = 0; i < obj.length; i++) {
@@ -188,6 +194,11 @@ _etc.python_types = {
 		let ret = new ex(obj.message, 
 			_etc.marshalling_factory(obj.exception))
 		return ret
+	},
+	_js_datetime: (obj) => {
+		let datetime = _local._pyjs.pyjs.import('datetime').datetime
+		let dt = datetime.fromtimestamp(obj.getTime() / 1000)
+		return dt[_local.marshaled_object_tag]
 	},
 	_js_function: (ptr) => {
 		//get a normal (non-async) version of the callback_factory

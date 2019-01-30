@@ -44,10 +44,41 @@ inline Napi::Value CoerceAsInteger(const Napi::CallbackInfo &info)
 	return napiValue;
 };
 
+inline Napi::Value CoerceAsTuple(const Napi::CallbackInfo &info)
+{
+	Napi::Env env = info.Env();
+	Napi::EscapableHandleScope scope(env);
+
+	napi_value napi_array = info[0];
+	uint32_t size;
+
+	NAPI_DIRECT_START(env);
+	NAPI_DIRECT_FUNC(napi_get_array_length, napi_array, &size);
+
+	PyObject* obj = PyTuple_New(size); //PyTuple_New (New)
+
+	for (uint32_t i = 0; i < size; i++)
+	{
+		napi_value napi_ele;
+		NAPI_DIRECT_FUNC(napi_get_element, napi_array, i, &napi_ele);
+		NapiPyObject* _npo = Napi::ObjectWrap<NapiPyObject>::Unwrap(Napi::Object(env, napi_ele).As<Napi::Object>());
+		PyObject* py_ele = _npo->GetPyObject(env);
+		PyTuple_SET_ITEM(obj, i, py_ele);
+	}
+
+	Napi::Value napiValue = NapiPyObject::NewInstance(env, {});
+	NapiPyObject* npo = Napi::ObjectWrap<NapiPyObject>::Unwrap(napiValue.As<Napi::Object>());
+	npo->SetPyObject(env, obj);
+	npo->SetObjectType(PyObjectType::Tuple);
+
+	return scope.Escape(napi_value(napiValue));
+}
+
 inline Napi::Object coerceAs(Napi::Env env)
 {
 	Napi::Object obj = Napi::Object::New(env);
 	obj.Set("Integer", Napi::Function::New(env, CoerceAsInteger));
+	obj.Set("Tuple", Napi::Function::New(env, CoerceAsTuple));
 
 	return obj;
 };

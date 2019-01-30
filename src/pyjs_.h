@@ -69,16 +69,18 @@ enum PyObjectType
 	Function,
 	Method,
 	Type,
+	DateTime,
+	_JS_DateTime,
 	_JS_Function,
 	_JS_Wrap,
 	Python_Exception,
 	Unsupported
 };
 
-enum PyObjectTarget
+enum PyJsSpecialObjectType
 {
-	Python = 0,
-	Javascript
+	UnknownJSType = 0,
+	JSDateTime
 };
 
 namespace pyjs
@@ -103,17 +105,20 @@ namespace pyjs
 	class PyjsConfigurationOptions
 	{
 		private:
+			static Napi::FunctionReference js_type_checking_callback_;
 			static Napi::FunctionReference serialization_filter_callback_;
 			static Napi::FunctionReference unmarshalling_filter_callback_;
 			static std::unique_ptr<napi_ext::ThreadSafeCallback> debug_messaging_callback_;
 
 		public:
 			static Napi::Object Init(const Napi::Env env, const Napi::Object exports);
+			static Napi::Value SetJSTypeCheckingCallback(const Napi::CallbackInfo &info);
 			static Napi::Value SetSerializationFiltersConstructor(const Napi::CallbackInfo &info);
 			static const std::unique_ptr<const std::vector<Napi::Function>> GetSerializationFilters();
 			static Napi::Value SetUnmarshallingFilter(const Napi::CallbackInfo &info);
 			static NapiPyObject* AttemptNapiObjectUnmarshalling(Napi::Env env, Napi::Value obj);
 			static Napi::Value SetDebugMessagingCallback(const Napi::CallbackInfo &info);
+			static PyJsSpecialObjectType CheckJSSpecialType(const Napi::Value val);
 			static void SendDebugMessage(const std::vector<std::string> msg);
 			static bool IsDebugEnabled();
 	};
@@ -268,7 +273,7 @@ namespace pyjs_utils
 	std::vector<PyObject*> _pyobj_vector;
 
 #define PY_CHECK_INCLUDE(obj)								\
-	_pyobj_vector.push_back(obj);
+	_pyobj_vector.emplace_back(obj);
 
 #define PY_CHECK(env, a, b, c)								\
 	if (a == b || PyErr_Occurred())							\

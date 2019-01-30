@@ -83,6 +83,18 @@ describe('pyjs: basic functions', function() {
 			assert.strictEqual(p.base().str(p.$coerceAs.int('10')), '10')
 			assert.strictEqual(p.base().str(p.$coerceAs.Integer('10')), '10')
 		})
+
+		it('#Tuple() should be a function', function() {
+			assert.isFunction(p.$coerceAs.Tuple)
+		})
+
+		it("#Tuple([1,2,3]) should return a Python tuple object", function() {
+			assert.include(p.base().str(p.base().type(p.$coerceAs.Tuple([1,2,3,4]))), 'tuple')
+		})
+
+		it("#Tuple([1,2,3]) should return a Python tuple object", function() {
+			assert.include(p.base().str(p.base().type(p.$coerceAs.Tuple([1,2,3,4]))), 'tuple')
+		})
 	})
 
 	describe('[py->js] none to null', function() {
@@ -144,6 +156,16 @@ describe('pyjs: basic functions', function() {
 
 		it('01_basic#basic_string() returns "this is a string"', function() {
 			assert.strictEqual(p.import('01_basic').basic_string(), "this is a string")
+		})
+	})
+
+	describe('[py->js] tuple to array', function() {
+		it('01_basic#basic_tuple() returns an array', function() {
+			assert.isArray(p.import('01_basic').basic_tuple())
+		})
+
+		it('01_basic#basic_tuple() returns an array', function() {
+			assert.deepStrictEqual(p.import('01_basic').basic_tuple(), [1n,2n,3n,4n])
 		})
 	})
 
@@ -289,9 +311,21 @@ describe('pyjs: basic functions', function() {
 		})
 	})
 
+	describe('[js->py] tuple (coerce) to tuple', function() {
+		it('01_basic#basic_tuple_j([1.1,"a",99.9,True,1]) returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_tuple_j(p.$coerceAs.Tuple([1.1,'a',99.9,true,1n])))
+		})
+	})
+
 	describe('[js->py] array to list', function() {
 		it('01_basic#basic_list_j([1.1,"a",99.9,True]) returns true', function() {
 			assert.isTrue(p.import('01_basic').basic_list_j([1.1,'a',99.9,true]))
+		})
+	})
+
+	describe('[js->py] array to list', function() {
+		it('01_basic#basic_list_j(b"abcdefg") returns true', function() {
+			assert.isTrue(p.import('01_basic').basic_bytes_j(Buffer.from('abcdefg')))
 		})
 	})
 
@@ -305,6 +339,11 @@ describe('pyjs: basic functions', function() {
 					}
 				}
 			))
+		})
+
+		it('[js->py] date to datetime', function() {
+			let date = new Date(2019, 0, 4, 12, 55, 11, 14)
+			assert.isTrue(p.import('01_basic').basic_datetime_j(date))
 		})
 	})
 
@@ -339,8 +378,20 @@ describe('pyjs: basic functions', function() {
 			assert.strictEqual("abcd", p.import('01_basic').basic_echo_tester("abcd"))
 		})
 
+		it('01_basic#basic_echo_tester(coerce([9n,3n,"a",{d:true}]))', function() {
+			let echo = p.import('01_basic').basic_echo_tester(
+				p.$coerceAs.Tuple([9n,3n,'a',{d:true}]))
+			echo[3] = map_to_object(echo[3])
+			assert.deepStrictEqual([9n,3n,'a',{d:true}], echo)
+		})
+
 		it('01_basic#basic_echo_tester([1,2,3,"あ"])', function() {
 			assert.deepStrictEqual([1,2,3,'あ',1500n], p.import('01_basic').basic_echo_tester([1,2,3,'あ',1500n]))
+		})
+
+		it('01_basic#basic_echo_tester(b"あいうえお")', function() {
+			assert.isTrue(p.import('01_basic').basic_echo_tester(Buffer.from('あいうえお'))
+				.equals(Buffer.from('あいうえお')))
 		})
 
 		it('01_basic#basic_echo_tester({a: 1, b: 2, c: {d: true}})', function() {

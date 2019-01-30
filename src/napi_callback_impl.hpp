@@ -190,7 +190,7 @@ namespace napi_ext
 	inline std::future<void> ThreadSafeCallback::error(const std::string& message)
 	{
 		return operator()([message](napi_env env, std::vector<napi_value>& args) {
-			args.push_back(Napi::Error::New(env, message).Value());    
+			args.emplace_back(Napi::Error::New(env, message).Value());    
 		});
 	}
 
@@ -210,7 +210,7 @@ namespace napi_ext
 	inline void ThreadSafeCallback::error(const std::string& message, completion_func_t completion_function)
 	{
 		operator()([message](napi_env env, std::vector<napi_value>& args) {
-			args.push_back(Napi::Error::New(env, message).Value());    
+			args.emplace_back(Napi::Error::New(env, message).Value());    
 		}, completion_function);
 	}
 
@@ -233,7 +233,7 @@ namespace napi_ext
 	{
 		return callStringify([message](napi_env env, std::vector<napi_value>& args)
 		{
-			args.push_back(Napi::Error::New(env, message).Value());
+			args.emplace_back(Napi::Error::New(env, message).Value());
 		});
 	}
 

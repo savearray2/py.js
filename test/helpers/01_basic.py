@@ -39,6 +39,9 @@ def basic_byte_array():
 def basic_string():
 	return 'this is a string'
 
+def basic_tuple():
+	return (1,2,3,4)
+
 def basic_list():
 	return [1,None,123.4,str.encode('あいうえお'),bytearray('好的', 'utf-8'),'list']
 
@@ -99,11 +102,20 @@ def basic_float_j(a):
 def basic_string_j(a):
 	return 'あいうえお' == a
 
+def basic_tuple_j(a):
+	return (1.1,"a",99.9,True,1) == a
+
 def basic_list_j(a):
 	return [1.1,'a',99.9,True] == a
 
+def basic_bytes_j(a):
+	return b'abcdefg' == a
+
 def basic_dict_j(a):
 	return {'a': 1.3, 'b': 100.1, 'あいうえお': { 7.0:True } } == a
+
+def basic_datetime_j(a):
+	return a.hour == 12 and a.minute == 55 and a.second == 11 and a.month == 1 and a.year == 2019 and a.day == 4
 
 #//////////////////////////////////////////////////////////////////////////
 

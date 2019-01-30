@@ -136,7 +136,7 @@ void pyjs_async::PythonLoopMessageNotify(pyjs_async::PythonNodeAsyncMessage&& ms
 {
 	{
 		std::lock_guard<std::mutex> lock(_python_message_queue_mutex);
-		python_message_queue.push_back(std::move(msg));
+		python_message_queue.emplace_back(std::move(msg));
 	}
 
 	uv_async_send(&ploop.ntp_async_handler);

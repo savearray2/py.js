@@ -17,10 +17,13 @@
 //////////////////////////////////////////////////////////////////////////
 'use strict'
 
-const chalk = require('chalk')
 const fs = require('fs')
-const moment = require('moment')
 const path = require('path')
+const util = require('util')
+
+const chalk = require('chalk')
+const moment = require('moment')
+
 
 const _pyjs = require('./build/Release/pyjs.node')
 const _etc = require('./js/etc.js')
@@ -41,6 +44,20 @@ const _debug_handler = function() {
 }
 
 ////////////////////////////////////////////
+// Special Type Checker
+////////////////////////////////////////////
+
+const _js_type_checking_types = {
+	UNKNOWN_JS_TYPE: 0,
+	JS_DATETIME: 1
+}
+
+const _js_type_checking = (obj) => {
+	if (util.isDate(obj))
+		return _js_type_checking_types.JS_DATETIME
+}
+
+////////////////////////////////////////////
 // Setup
 ////////////////////////////////////////////
 
@@ -49,6 +66,7 @@ _pyjs.$SetDebugMessagingCallback(_debug_handler)
 _pyjs.$SetSerializationCallbackConstructor(_etc.default_serializer)
 _pyjs.$SetSerializationFilterConstructor(_etc.serializaition_filter)
 _pyjs.$SetUnmarshallingFilter(_etc.unmarshalling_filter)
+_pyjs.$SetJSTypeCheckingCallback(_js_type_checking)
 
 ////////////////////////////////////////////
 // Pass-through Functions
@@ -120,8 +138,7 @@ pyjs.evalAsFile = function (code, path) {
 ////////////////////////////////////////////
 
 pyjs.$coerceAs = {
-	Integer: function(num)
-	{
+	Integer: function(num) {
 		if (_etc.parameter_check.methods.number.f(num)) {
 			return _etc.marshalling_factory(
 				_pyjs.$coerceAs.Integer(num))
@@ -133,6 +150,15 @@ pyjs.$coerceAs = {
 		else
 			throw Error("Unknown type. Unable to coerce as integer.")
 	},
+	Tuple: function(array) {
+		if (!_etc.parameter_check.methods.array.f(array)) {
+			throw Error("You must supply an array to coerce as tuple.")
+		}
+
+		return _etc.marshalling_factory(
+			_pyjs.$coerceAs.Tuple(
+				array.map(x => _pyjs.$GetMarshaledObject(x))))
+	}
 }
 
 //Shortcuts
@@ -167,7 +193,32 @@ pyjs.init = ({ 	exitHandler: exit_handler,
 	}
 	else if (!_etc.parameter_check.methods.undefined.f(python_path)) {
 		throw Error("Option 'pythonPath' must be a string.")
+	} 
+	
+	/*if (process.env.PYTHONPATH === undefined
+		&& python_path === undefined) {
+		try {
+			const exec = require('child_process').execSync
+			const site = exec('python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"',
+				{encoding: 'utf8'}).trim()
+			process.env.PYTHONPATH = `${site}`
+		}
+		catch {}
 	}
+
+	if (process.env.PYTHONPATH === undefined
+		&& python_path === undefined) {
+		try {
+			const exec = require('child_process').execSync
+			const ver = exec('python --version', {encoding: 'utf8'}).trim().toLowerCase()
+			if (ver.startsWith('python 3')) {
+				const site = exec('python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"',
+					{encoding: 'utf8'}).trim()
+				process.env.PYTHONPATH = `${site}`
+			}
+		}
+		catch {}
+	}*/
 
 	_pyjs.init()
 

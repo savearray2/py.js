@@ -147,10 +147,6 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 			PyList_SET_ITEM(obj, i, ca); //PyList_SET_ITEM (Steals)
 		}
 	}
-	else if (val.IsTypedArray())
-	{
-		NAPI_ERROR(env, "Unable to marshal type: TypedArray is currently unsupported.");
-	}
 	else if (val.IsFunction())
 	{
 		//NAPI_ERROR(env, "Unable to marshal type: Function is currently unsupported.");
@@ -177,9 +173,13 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 
 		return std::make_pair(obj, pot);
 	}
-	else if (val.IsBuffer())
+	else if (val.IsBuffer() || val.IsTypedArray())
 	{
-		NAPI_ERROR(env, "Unable to marshal type: Buffer is currently unsupported.");
+		auto data = Napi::Buffer<const char>(env, val);
+		const char* bytes = data.Data();
+		//Return a new bytes object with a copy of the string v
+		obj = PyBytes_FromStringAndSize(bytes, data.Length()); //PyBytes_FromStringAndSize (New)
+		pot = PyObjectType::Bytes;
 	}
 	else if (val.IsObject())
 	{
@@ -247,11 +247,33 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 			Py_XDECREF(res);
 		}
 	}
-	else if (val.IsSymbol())
+	
+	if (val.IsSymbol())
 	{
 		NAPI_ERROR(env, "Unable to marshal Javascript type 'Symbol' to Python.");
 	}
-	else //This shouldn't happen.
+
+	//Napi has no good way of returning if something is a Date type yet...
+	//instanceof is unreliable in some cases
+	PyJsSpecialObjectType special_type = 
+		pyjs::PyjsConfigurationOptions::CheckJSSpecialType(val); 
+
+	if (special_type == PyJsSpecialObjectType::JSDateTime)
+	{
+		auto callback = NapiPyObject::serialization_callback_.Call(
+			{
+				Napi::Number::New(env, PyObjectType::_JS_DateTime),
+				val
+			}
+		);
+
+		NapiPyObject* _npo = Napi::ObjectWrap<NapiPyObject>::Unwrap(callback.As<Napi::Object>());
+		obj = _npo->GetPyObject(env);
+		Py_INCREF(obj); //Clone.
+
+		pot = PyObjectType::DateTime;
+	}
+	else if (obj == nullptr) //This shouldn't happen.
 	{
 		NAPI_ERROR(env, "Unable to marshal unknown Javascript type.");
 	}
@@ -394,12 +416,7 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 			NAPI_DIRECT_FUNC(napi_set_element, napi_array, i, val);
 		}
 
-		napiValue = NapiPyObject::serialization_callback_.Call(
-			{
-				Napi::Number::New(env, PyObjectType::Tuple),
-				napi_array
-			}
-		);
+		napiValue = Napi::Value(env, napi_array);
 	}
 	//List
 	else if (PyList_CheckExact(obj))
@@ -566,6 +583,9 @@ Napi::Value pyjs::Py_ConvertToJavascript(const Napi::Env env, PyObject* obj,
 ////////////////////////////////////////////
 
 Napi::FunctionReference
+	pyjs::PyjsConfigurationOptions::js_type_checking_callback_;
+
+Napi::FunctionReference
 	pyjs::PyjsConfigurationOptions::serialization_filter_callback_;
 
 Napi::FunctionReference
@@ -584,12 +604,20 @@ const std::unique_ptr<const std::vector<Napi::Function>>
 	if (!filter_object_.IsUndefined())
 	{
 		Napi::Object obj = filter_object_.As<Napi::Object>();
-		filters->push_back(obj.Get("SequenceTest").As<Napi::Function>());
-		filters->push_back(obj.Get("SequenceRegister").As<Napi::Function>());
-		filters->push_back(obj.Get("Finalize").As<Napi::Function>());
+		filters->emplace_back(obj.Get("SequenceTest").As<Napi::Function>());
+		filters->emplace_back(obj.Get("SequenceRegister").As<Napi::Function>());
+		filters->emplace_back(obj.Get("Finalize").As<Napi::Function>());
 	}
 
 	return filters;
+}
+
+Napi::Value pyjs::PyjsConfigurationOptions::SetJSTypeCheckingCallback(const Napi::CallbackInfo &info)
+{
+	Napi::Env env = info.Env();
+	js_type_checking_callback_ = Napi::Persistent(info[0].As<Napi::Function>());
+	js_type_checking_callback_.SuppressDestruct();
+	return env.Undefined();
 }
 
 Napi::Value pyjs::PyjsConfigurationOptions::SetSerializationFiltersConstructor(const Napi::CallbackInfo &info)
@@ -603,6 +631,8 @@ Napi::Value pyjs::PyjsConfigurationOptions::SetSerializationFiltersConstructor(c
 
 Napi::Object pyjs::PyjsConfigurationOptions::Init(Napi::Env env, Napi::Object exports)
 {
+	exports.Set("$SetJSTypeCheckingCallback", 
+		Napi::Function::New(env, pyjs::PyjsConfigurationOptions::SetJSTypeCheckingCallback));
 	exports.Set("$SetUnmarshallingFilter",
 		Napi::Function::New(env, pyjs::PyjsConfigurationOptions::SetUnmarshallingFilter));
 	exports.Set("$SetSerializationCallbackConstructor",
@@ -634,6 +664,11 @@ NapiPyObject* pyjs::PyjsConfigurationOptions::AttemptNapiObjectUnmarshalling(Nap
 	}
 	else
 		return NULL;
+}
+
+PyJsSpecialObjectType pyjs::PyjsConfigurationOptions::CheckJSSpecialType(const Napi::Value val)
+{
+	return (PyJsSpecialObjectType)js_type_checking_callback_.Call({ val }).ToNumber().Int32Value();
 }
 
 Napi::Value pyjs::PyjsConfigurationOptions::SetDebugMessagingCallback(const Napi::CallbackInfo &info)
