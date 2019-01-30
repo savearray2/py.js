@@ -124,6 +124,10 @@ p.finalize()
 
 Now when you run your Node.js script from the folder you have designated, py.js should also use the Python 3 version you have specified.
 
+#### Using ```virtualenv``` or ```venv```
+
+The virtualenv plugin for pyenv does not seem to create a symlink to ```python-config``` or ```python3-config```. As such, ```node-gyp``` will fail during the build process, as it will not be able to find the necessary information for compilation and linking. We suggest that you build under a specific ```pyenv``` version first, and then apply a ```virtualenv``` container after build completion.
+
 ### Getting Started
 
 .

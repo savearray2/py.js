@@ -213,6 +213,7 @@ _etc.python_types = {
 _local.object_attributes = {
 	all: {
 		//Proxy & Marshalling Helpers
+		$toString: (t) => t.$toString,
 		$isCallable: (t) => t.$isCallable,
 		$isClass: (t) => t.$isClass,
 		$isIterable: (t) => t.$isIterable,
@@ -425,6 +426,7 @@ _etc.marshalling_factory = (obj, modes) =>　{
 	}
 	//func.$call = func.$function_prototype(func).call
 	func.$apply = func.$_function_prototype(func)
+	func.$toString = () => _local._pyjs.pyjs.base().str(func._p)
 	func.$isCallable = () => func.py.IsCallable()
 	func.$isClass = () => func.py.GetObjectType() 
 		== _etc.python_object_type.TYPE
