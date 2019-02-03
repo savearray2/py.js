@@ -5,7 +5,7 @@
 Node.js/Python Bridge; Node.js-hosted Python.
 
 Documentation can be found [here](https://savearray2.github.io/py.js/).
-Click here for [here](examples/README.md) a few basic examples.
+Click here for [here](examples) a few basic examples.
 
 *This project is currently a WIP (work-in-progress) and is currently in **alpha**. Significant changes are to come.*
 
