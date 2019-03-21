@@ -1,3 +1,5 @@
+_I'm a bit busy at the moment, but I do plan on getting this project to basic launch. The only code that needs to be updated before the system can be used practically is the async code that handles Node functions being asynchronously called from Python. The code should be cleaned up a bit, as well._
+
 # py.js
 
 [![Build status](https://ci.appveyor.com/api/projects/status/e21hoqmy6lgre65w/branch/testing?svg=true)](https://ci.appveyor.com/project/savearray2/py-js/branch/testing) [![Build Status](https://travis-ci.org/savearray2/py.js.svg?branch=master)](https://travis-ci.org/savearray2/py.js)
