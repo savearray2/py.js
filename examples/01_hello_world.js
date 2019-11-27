@@ -16,6 +16,7 @@
 //	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //////////////////////////////////////////////////////////////////////////
 
+// @savearray2/py.js
 const p = require('..')
 p.init()
 p.base().print('Hello World from Python!')

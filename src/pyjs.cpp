@@ -152,7 +152,7 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 		//NAPI_ERROR(env, "Unable to marshal type: Function is currently unsupported.");
 		//return env.Undefined();
 		pot = PyObjectType::Function;
-		
+
 		PyObject* ptr = pyjs::FunctionBridgeRegisterCallback(env, val.As<Napi::Function>());
 		Napi::Value tmp_val = NapiPyObject::NewInstance(env, {});
 		NapiPyObject* tmp_obj = Napi::ObjectWrap<NapiPyObject>::Unwrap(tmp_val.As<Napi::Object>());
@@ -247,7 +247,7 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 			Py_XDECREF(res);
 		}
 	}
-	
+
 	if (val.IsSymbol())
 	{
 		NAPI_ERROR(env, "Unable to marshal Javascript type 'Symbol' to Python.");
@@ -637,7 +637,7 @@ Napi::Object pyjs::PyjsConfigurationOptions::Init(Napi::Env env, Napi::Object ex
 		Napi::Function::New(env, pyjs::PyjsConfigurationOptions::SetSerializationFiltersConstructor));
 	exports.Set("$SetDebugMessagingCallback",
 		Napi::Function::New(env, pyjs::PyjsConfigurationOptions::SetDebugMessagingCallback));
-		
+
 	return exports;
 }
 
@@ -653,7 +653,7 @@ NapiPyObject* pyjs::PyjsConfigurationOptions::AttemptNapiObjectUnmarshalling(Nap
 {
 	Napi::Value filter_output_ = pyjs::PyjsConfigurationOptions::unmarshalling_filter_callback_
 		.Call({ obj });
-	
+
 	if (!filter_output_.IsUndefined())
 	{
 		return Napi::ObjectWrap<NapiPyObject>::Unwrap(filter_output_.As<Napi::Object>());
@@ -741,12 +741,12 @@ static Napi::Value EvalHelper(const Napi::CallbackInfo &info, int type)
 	Napi::Env env = info.Env();
 
 	PY_CHECK_START()
-	
+
 	PyObject* code = Py_CompileString( //Py_CompileString (New)
 		info[0].As<Napi::String>().Utf8Value().c_str(), 
 		info[1].As<Napi::String>().Utf8Value().c_str(), type);
 	PY_CHECK(env, code, NULL, env.Undefined());
-	
+
 	PyObject* main = PyImport_AddModule("__main__"); //PyImport_AddModule (Borrow)
 	PY_CHECK(env, main, NULL, env.Undefined());
 
@@ -755,7 +755,7 @@ static Napi::Value EvalHelper(const Napi::CallbackInfo &info, int type)
 
 	PyObject* local = PyDict_New(); //PyDict_New (New)
 	PY_CHECK(env, local, NULL, env.Undefined());
-	
+
 	PyObject* obj = PyEval_EvalCode(code, global, local); //PyEval_EvalCode (New)
 	PY_CHECK(env, obj, NULL, env.Undefined());
 
@@ -790,7 +790,7 @@ static Napi::Value Global(const Napi::CallbackInfo &info)
 	//Check if static reference is available
 	if (__py__main__module_ == NULL)
 		return env.Undefined();
-	
+
 	auto map = std::unique_ptr<std::unordered_map<PyObject*,napi_value>>
 		(new std::unordered_map<PyObject*,napi_value>());	
 
@@ -866,7 +866,7 @@ static PyObject* PyCapsuleNodeJSInterfaceFunctionCall(PyObject* self, PyObject* 
 			{
 				auto map = std::unique_ptr<std::unordered_map<PyObject*,napi_value>>
 					(new std::unordered_map<PyObject*,napi_value>());
-						
+
 				auto js = pyjs::Py_ConvertToJavascript(env, cb_args,
 					pyjs::PyjsConfigurationOptions::GetSerializationFilters(),
 					map, pyjs::MarshallingOptions());
@@ -987,7 +987,7 @@ static PyMethodDef PyCapsuleNodeJsMethods[] =
 		PyCapsuleNodeJSInterfaceGetCurrentThreadID,
 		METH_VARARGS,
 		"gets the current thread id from the node.js/python interface." 
-	}, 
+	},
 	{
 		"_debug_enabled",
 		PyCapsuleNodeJSInterfaceDebugEnabled,

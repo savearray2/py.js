@@ -14,7 +14,7 @@
         "conditions": [
             ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris"', {
                 "variables": {
-                    "python_config_ldflags%": "<!(python3-config --ldflags)",
+                    "python_config_ldflags%": "<!((python3-config --ldflags --embed) > /dev/null 2>&1 && python3-config --ldflags --embed || python3-config --ldflags)",
 					"python_config_cflags%": "<!(python3-config --cflags | sed s/-Wstrict-prototypes//)"
                 },
                 "cflags": [
@@ -32,7 +32,7 @@
             ['OS=="mac"', {
 				"libraries": [
 			        "-L<!(python3-config --prefix)/lib",
-                    "<!(python3-config --libs)"
+                    "<!((python3-config --libs --embed) > /dev/null 2>&1 && python3-config --libs --embed || python3-config --libs)"
                 ],
                 "xcode_settings": {
                     "cflags": [
