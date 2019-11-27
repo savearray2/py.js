@@ -27,7 +27,7 @@ install:
   - npm --version
   # run tests
   - cmd: npm run version
-  - cmd: echo $APPVEYOR_BUILD_FOLDER
+  - cmd: echo %APPVEYOR_BUILD_FOLDER%
   - cmd: npm test
 
 # Don't actually build.
