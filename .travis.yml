@@ -46,7 +46,7 @@ matrix:
         - pyenv local 2.7.15 ${PY_LATEST}
         - python3 --version
         - node --version
-        - npm install --verbose --python_config_ldflags="$(python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
+        - npm install --verbose --python_config_ldflags="$((python3-config --ldflags --embed) > /dev/null 2>&1 && python3-config --ldflags --embed || python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
       script:
         - pyenv global ${PY_LATEST}
         - pyenv local ${PY_LATEST}
@@ -105,7 +105,7 @@ matrix:
         - pyenv local 2.7.15 ${PY_LATEST}
         - python3 --version
         - node --version
-        - npm install --verbose --python_config_ldflags="$(python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
+        - npm install --verbose --python_config_ldflags="$((python3-config --ldflags --embed) > /dev/null 2>&1 && python3-config --ldflags --embed || python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
       script:
         - pyenv global ${PY_LATEST}
         - pyenv local ${PY_LATEST}
@@ -164,7 +164,7 @@ matrix:
         - pyenv local 2.7.15 3.5.6
         - python3 --version
         - node --version
-        - npm install --verbose --python_config_ldflags="$(python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
+        - npm install --verbose --python_config_ldflags="$((python3-config --ldflags --embed) > /dev/null 2>&1 && python3-config --ldflags --embed || python3-config --ldflags) -Wl,--enable-new-dtags -Wl,-R,$(python3-config --prefix)/lib" --python_config_cflags="$(python3-config --cflags)"
       script:
         - pyenv global 3.5.6
         - pyenv local 3.5.6
