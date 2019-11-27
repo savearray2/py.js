@@ -181,9 +181,9 @@ matrix:
         - npm test
     - if: branch = testing
       os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11.2
       compiler: clang
-      name: "OSX (10.13): Node Current & python3 Current"
+      name: "OSX (10.14): Node Current & python3 Current"
       before_install:
         #Install Current Node LTS + Python3
         - brew update
