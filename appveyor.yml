@@ -16,17 +16,18 @@ install:
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version $env:platform
   # install modules
-  - npm install --python_include="C:\\\\Python37-x64"
+  - npm install --python_include="C:\\\\Python38-x64"
 
 # Post-install test scripts.
 #test_script:
   - |-
-    SET PATH=C:\\Python37-x64;%PATH%
+    SET PATH=C:\\Python38-x64;%PATH%
   # Output useful info for debugging.
   - node --version
   - npm --version
   # run tests
   - cmd: npm run version
+  - cmd: echo $APPVEYOR_BUILD_FOLDER
   - cmd: npm test
 
 # Don't actually build.
