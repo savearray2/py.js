@@ -52,16 +52,16 @@ Note: *x86 and ARM architectures have yet to be tested.*
 
 ##### Linux
 * Ubuntu 14.04 LTS, g++6, Node.js 10 LTS, Python 3.5 (x64)
-* Ubuntu 16.04 LTS, g++8, Node.js 10 LTS, Python 3.7 (x64)
-* Ubuntu 16.04 LTS, g++8, Node.js 11, Python 3.7 (x64)
+* Ubuntu 16.04 LTS, g++8, Node.js 10 LTS, Python 3.8 (x64)
+* Ubuntu 16.04 LTS, g++8, Node.js 11, Python 3.8 (x64)
 
 ##### OS X
 * OS X 10.13, Node.js 11, Python 3.7 (x64)
 * OS X 10.14, Node.js 11, Python 3.7 (x64)
 
 ##### Windows
-* Windows 10, Node.js 10 LTS, Python 3.7, MSVS 2015 (x64)
-* Windows 10, Node.js 11, Python 3.7, MSVS 2015 (x64)
+* Windows 10, Node.js 12 LTS, Python 3.8, MSVS 2015 (x64)
+* Windows 10, Node.js 13, Python 3.8, MSVS 2015 (x64)
 
 *See our build tests here: [Linux & Mac](https://travis-ci.org/savearray2/py.js), [Windows](https://ci.appveyor.com/project/savearray2/py-js).*
 

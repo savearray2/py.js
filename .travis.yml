@@ -187,8 +187,8 @@ matrix:
       before_install:
         #Install Current Node LTS + Python3
         - brew update
-        - brew upgrade python3
-        - brew upgrade nodejs
+        - brew upgrade python3 || true
+        - brew upgrade nodejs || true
       install:
         - node --version
         - python3 --version
