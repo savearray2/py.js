@@ -251,7 +251,7 @@ pyjs.finalize = () => {
 	//Call any handlers if we have them
 	if (_exit_handler !== undefined)
 		_exit_handler()
-	
+
 	_pyjs.beginFinalize()
 	//TODO make sure all async functions are destructed here
 
@@ -263,7 +263,7 @@ pyjs.finalize = () => {
 
 	//Force Python to clear everything itself, no matter what threads are open
 	//Seems that Py_Finalize/Ex sometimes hangs with other threads open
-	try { _pylib.exit() } catch {}
+	//try { _pylib.exit() } catch {}
 
 	process.removeListener('SIGINT', _finalize_listener)
 	process.removeListener('SIGTERM', _finalize_listener)

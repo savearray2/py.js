@@ -29,7 +29,7 @@ static uv_loop_t* _node_event_loop;
 ////////////////////////////////////////////
 
 static std::atomic<bool> exiting(false);
-static pyjs_async::python_loop ploop{};
+static pyjs_async::python_loop py_loop{};
 static std::mutex _python_message_queue_mutex;
 static std::vector<pyjs_async::PythonNodeAsyncMessage> python_message_queue{};
 
@@ -68,11 +68,17 @@ static void node_to_python_message_handler(uv_async_t* _handle)
 			PyObject* pyObject = ele.arguments[0]; //remote function object
 			PyObject* args = ele.arguments[1];
 			PyObject* dict = ele.arguments[2];
-			PyObject* ret;
+			PyObject* ret = NULL;
+			std::pair<std::string, PyObject*> py_ex;
 
 			{
 				lock_gil lock_me;
 				ret = PyObject_Call(pyObject, args, dict); //PyObject_Call (New)
+
+				if (ret == NULL)
+				{
+					py_ex = pyjs_utils::GetPythonException();
+				}
 
 				Py_DECREF(pyObject); //cloned for async in (FunctionCallAsync)
 				Py_DECREF(args); //new from (ProcessFunctionCallArguments)
@@ -124,12 +130,12 @@ static void node_to_python_message_handler(uv_async_t* _handle)
 //Does nothing for now.
 static void python_to_node_message_handler(uv_async_t* _handle) {}
 
-static void python_loop_thread(pyjs_async::python_loop* _ploop)
+static void python_loop_thread(pyjs_async::python_loop* _py_loop)
 {
 	
 	PY_DEBUG("('python_loop' thread started)");
 	UV_CHECK_START();
-	UV_CHECK_VOID(uv_run, &ploop.loop, UV_RUN_DEFAULT);
+	UV_CHECK_VOID(uv_run, &py_loop.loop, UV_RUN_DEFAULT);
 }
 
 void pyjs_async::PythonLoopMessageNotify(pyjs_async::PythonNodeAsyncMessage&& msg)
@@ -139,7 +145,7 @@ void pyjs_async::PythonLoopMessageNotify(pyjs_async::PythonNodeAsyncMessage&& ms
 		python_message_queue.emplace_back(std::move(msg));
 	}
 
-	uv_async_send(&ploop.ntp_async_handler);
+	uv_async_send(&py_loop.ntp_async_handler);
 }
 
 void pyjs_async::StartMainPythonLoop(const Napi::CallbackInfo &info)
@@ -153,19 +159,19 @@ void pyjs_async::StartMainPythonLoop(const Napi::CallbackInfo &info)
 	UV_CHECK_START();
 
 	//Grab node's loop handler info.
-	UV_CHECK_VOID(uv_async_init, _node_event_loop, &ploop.ptn_async_handler, python_to_node_message_handler);
+	UV_CHECK_VOID(uv_async_init, _node_event_loop, &py_loop.ptn_async_handler, python_to_node_message_handler);
 
 	//The main loop handler for Python async events and tasks. We do our messaging here.
-	UV_CHECK_VOID(uv_loop_init, &ploop.loop);
-	UV_CHECK_VOID(uv_async_init, &ploop.loop, &ploop.ntp_async_handler, node_to_python_message_handler);
+	UV_CHECK_VOID(uv_loop_init, &py_loop.loop);
+	UV_CHECK_VOID(uv_async_init, &py_loop.loop, &py_loop.ntp_async_handler, node_to_python_message_handler);
 
 	//A timer that runs on node's main loop and forces node to give up its GIL so other Python tasks can run (e.g. async).
-	UV_CHECK_VOID(uv_timer_init, _node_event_loop, &ploop.switching_loop_timer);
-	UV_CHECK_VOID(uv_timer_start, &ploop.switching_loop_timer, python_switching_handler, 500, 10);
+	UV_CHECK_VOID(uv_timer_init, _node_event_loop, &py_loop.switching_loop_timer);
+	UV_CHECK_VOID(uv_timer_start, &py_loop.switching_loop_timer, python_switching_handler, 500, 10);
 
 	//Start new loops using C++11 threading implementation (cross-platform)
 	std::thread py_thread([] {
-		python_loop_thread(&ploop);
+		python_loop_thread(&py_loop);
 	});
 	py_thread.detach();
 }
@@ -181,9 +187,9 @@ void pyjs_async::DestroyAsyncHandlers()
 		exiting = true;
 
 		//Stop handlers.
-		uv_unref((uv_handle_t*)&ploop.ntp_async_handler);
-		uv_unref((uv_handle_t*)&ploop.ptn_async_handler);
-		uv_timer_stop(&ploop.switching_loop_timer);
+		uv_unref((uv_handle_t*)&py_loop.ntp_async_handler);
+		uv_unref((uv_handle_t*)&py_loop.ptn_async_handler);
+		uv_timer_stop(&py_loop.switching_loop_timer);
 	}
 }
 

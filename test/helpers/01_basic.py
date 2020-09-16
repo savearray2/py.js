@@ -112,7 +112,7 @@ def basic_bytes_j(a):
 	return b'abcdefg' == a
 
 def basic_dict_j(a):
-	return {'a': 1.3, 'b': 100.1, 'あいうえお': { 7.0:True } } == a
+	return {'a': 1.3, 'b': 100.1, 'あいうえお': { '7':True } } == a
 
 def basic_datetime_j(a):
 	return a.hour == 12 and a.minute == 55 and a.second == 11 and a.month == 1 and a.year == 2019 and a.day == 4

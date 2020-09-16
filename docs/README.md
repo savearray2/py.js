@@ -19,7 +19,7 @@ Py.js is written using modern C++, and hosts a Python interpreter directly withi
 *<small>Released under the AGPLv3.</small>*
 
 ``` js
-const p = require('py.js')
+const p = require('@savearray2/py.js')
 p.init()
 p.base().print('Hello World from Python!')
 ```
@@ -99,7 +99,7 @@ It is possible that Linux, or other POSIX compliant systems, may have trouble fi
 export LD_LIBRARY_PATH="$(python3-config --prefix)/lib:$LD_LIBRARY_PATH"
 ```
 
-Some distributions may also use different utilities and methodologies to find shared libraries. For example, Ubuntu uses ```ldconfig```. Please refer to your distributions's manual for more information, and for the best way to reference shared libraries on your system. There also may be certain security implications depending on the method you pick.
+Some distributions may also use different utilities and methodologies to find shared libraries. For example, Ubuntu uses ```ldconfig```. Please refer to your distribution's manual for more information, and for the best way to reference shared libraries on your system. There also may be certain security implications depending on the method you pick.
 
 If you wish, you may also link the shared Python library during the  ```node-gyp``` build process with a ```RPATH``` or ```RUNPATH``` reference. The *LDFLAGS* and *CFLAGS* options are configurable through the ```python_config_cflags``` and ```python_config_ldflags``` command-line flags. Here is an example of how they might be used:
 
@@ -109,7 +109,7 @@ npm install --verbose --python_config_ldflags="$(python3-config --ldflags) -Wl,-
 
 These flags will not work on OS X. Please see the project's ```binding.gyp``` file for more information.
 
-You can check the version of Python that ```py.js``` is using with the following short script:
+You can check the version of Python that py.js is using with the following short script:
 
 ```js
 const p = require('@savearray2/py.js')
@@ -126,13 +126,46 @@ Now when you run your Node.js script from the folder you have designated, py.js 
 
 #### Using ```virtualenv``` or ```venv```
 
-The virtualenv plugin for pyenv does not seem to create a symlink to ```python-config``` or ```python3-config```. As such, ```node-gyp``` will fail during the build process, as it will not be able to find the necessary information for compilation and linking. We suggest that you build under a specific ```pyenv``` version first, and then apply a ```virtualenv``` container after build completion.
+The virtualenv plugin for pyenv does not seem to create a symlink to ```python-config``` or ```python3-config```. As such, ```node-gyp``` will fail during the build process, as it will not be able to find the necessary information for compilation and linking. We suggest that you build under a specific ```pyenv``` version first, and then apply a ```virtualenv``` container after build completion. For example:
+
+```bash
+cd my_work_directory
+pyenv local 2.7.15 3.7.2
+npm install @savearray2/py.js
+pyenv virtualenv 3.7.2 pyjs
+pyenv local pyjs
+```
 
 ### Getting Started
 
-.
+To get started using the library, import it like usual:
 
-### Limitations
+```js
+const p = require('@savearray2/py.js')
+```
+
+Before the Python interpreter can be accessed, py.js must be initialized. Py.js will throw an exception if the ```init``` function is called multiple times. Py.js will also throw an exception if you attempt to access the Python interpreter before initialization. The library can be initialized very easily.
+
+```js
+const p = require('@savearray2/py.js')
+p.init({
+	pythonPath: 
+		`${process.cwd()}:/usr/local/lib/python3.7/site-packages`
+})
+```
+
+The ```init``` function takes an options object parameter with some useful properties. When a Python interpreter is embedded, it must be instructed where to load its base library files. This is typically done with environment variables. The ```PYTHONPATH``` environment variable can be altered through the init function, as shown above. One of the easiest ways to figure out the default library paths for a given Python runtime is by invoking Python itself.
+
+```js
+const exec = require('child_process').execSync
+const site = exec('python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"',
+	{encoding: 'utf8'}).trim() //Make sure you include trim() to remove extraneous whitespace
+```
+
+It is also wise to include the current directory when setting ```PYTHONPATH```. Without doing so, it may not be possible for the embedded Python runtime to find Python scripts you have included in the same directory as your Node.js scripts. *Py.js will not attempt to set ```PYTHONPATH``` on its own.*
+
+
+### Design Limitations
 
 .
 
@@ -142,7 +175,7 @@ The virtualenv plugin for pyenv does not seem to create a symlink to ```python-c
 
 ### pyjs
 
-##### pyjs.init()
+##### pyjs.init([options])
 
 ##### pyjs.finalize()
 
