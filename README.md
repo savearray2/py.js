@@ -15,7 +15,7 @@ Click here for [here](examples/README.md) a few basic examples.
 let chalk = require('chalk')
 let p = require('py.js')
 p.init({ pythonPath: 
-	`${process.cwd()}/local:/usr/local/lib/python3.7/site-packages`
+	`${process.cwd()}/local:/usr/local/lib/python3.8/site-packages`
 })
 
 let plotly = p.import('plotly')
@@ -51,13 +51,13 @@ Note: *x86 and ARM architectures have yet to be tested.*
 #### Current Testing Matrix
 
 ##### Linux
-* Ubuntu 14.04 LTS, g++6, Node.js 10 LTS, Python 3.5 (x64)
-* Ubuntu 16.04 LTS, g++8, Node.js 10 LTS, Python 3.8 (x64)
-* Ubuntu 16.04 LTS, g++8, Node.js 11, Python 3.8 (x64)
+* Ubuntu 14.04 LTS, g++6, Node.js 12 LTS, Python 3.5 (x64)
+* Ubuntu 16.04 LTS, g++8, Node.js 12 LTS, Python 3.8 (x64)
+* Ubuntu 16.04 LTS, g++8, Node.js 13, Python 3.8 (x64)
 
 ##### OS X
-* OS X 10.13, Node.js 11, Python 3.7 (x64)
-* OS X 10.14, Node.js 11, Python 3.7 (x64)
+* OS X 10.14, Node.js 13, Python 3.7 (x64)
+* OS X 10.14, Node.js 13, Python 3.8 (x64)
 
 ##### Windows
 * Windows 10, Node.js 12 LTS, Python 3.8, MSVS 2015 (x64)

@@ -30,5 +30,12 @@ before(function() {
 })
 
 after(function () {
-	assert.doesNotThrow(() => p.finalize())	
+	assert.doesNotThrow(() => p.finalize())
+	// force the process to close so that p
+	// isn't touched after finalize
+	// otherwise a seg fault happens
+	// (but only when using npm run test,
+	// not directly...)
+	console.log()
+	process.exit(0)
 })
