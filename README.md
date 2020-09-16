@@ -15,7 +15,7 @@ Click here for [here](examples) a few basic examples.
 
 ```js
 let chalk = require('chalk')
-let p = require('py.js')
+let p = require('@savearray2/py.js')
 p.init({ pythonPath: 
 	`${process.cwd()}/local:/usr/local/lib/python3.8/site-packages`
 })
