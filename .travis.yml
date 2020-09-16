@@ -20,7 +20,7 @@ matrix:
         - |-
           pyenv virtualenvwrapper
         - |-
-          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b] | tail -1)
+          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b\|rc] | tail -1)
         - |-
           echo Latest version of Python from pyenv = ${PY_LATEST}
         #Install Current Node LTS
@@ -81,7 +81,7 @@ matrix:
         - |-
           pyenv virtualenvwrapper
         - |-
-          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b] | tail -1)
+          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b\|rc] | tail -1)
         - |-
           echo Latest version of Python from pyenv = ${PY_LATEST}
         #Install Current Node
@@ -140,7 +140,7 @@ matrix:
         - |-
           pyenv virtualenvwrapper
         - |-
-          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b] | tail -1)
+          export PY_LATEST=$(pyenv install --list | sed "s/^  //" | grep -E '^[0-9]' | grep -Ev [dev\|a\|b\|rc] | tail -1)
         - |-
           echo Latest version of Python from pyenv = ${PY_LATEST}
         #Install Current Node LTS
