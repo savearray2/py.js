@@ -1,3 +1,5 @@
+_I'm a bit busy at the moment, but I do plan on getting this project to basic launch. The only code that needs to be updated before the system can be used practically is the async code that handles Node functions being asynchronously called from Python. The code should be cleaned up a bit, as well._
+
 # py.js
 
 [![Build status](https://ci.appveyor.com/api/projects/status/e21hoqmy6lgre65w/branch/testing?svg=true)](https://ci.appveyor.com/project/savearray2/py-js/branch/testing) [![Build Status](https://travis-ci.org/savearray2/py.js.svg?branch=master)](https://travis-ci.org/savearray2/py.js)
@@ -5,7 +7,7 @@
 Node.js/Python Bridge; Node.js-hosted Python.
 
 Documentation can be found [here](https://savearray2.github.io/py.js/).
-Click here for [here](examples/README.md) a few basic examples.
+Click here for [here](examples) a few basic examples.
 
 *This project is currently a WIP (work-in-progress) and is currently in **alpha**. Significant changes are to come.*
 
@@ -13,7 +15,7 @@ Click here for [here](examples/README.md) a few basic examples.
 
 ```js
 let chalk = require('chalk')
-let p = require('py.js')
+let p = require('@savearray2/py.js')
 p.init({ pythonPath: 
 	`${process.cwd()}/local:/usr/local/lib/python3.8/site-packages`
 })
