@@ -53,7 +53,7 @@ Note: *x86 and ARM architectures have yet to be tested.*
 #### Current Testing Matrix
 
 ##### Linux
-* Ubuntu 14.04 LTS, g++6, Node.js 12 LTS, Python 3.5 (x64)
+* Ubuntu 14.04 LTS, g++6, Node.js 14 LTS, Python 3.5 (x64)
 * Ubuntu 16.04 LTS, g++8, Node.js 14 LTS, Python 3.9 (x64)
 * Ubuntu 16.04 LTS, g++8, Node.js 15, Python 3.9 (x64)
 
