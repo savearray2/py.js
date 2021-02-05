@@ -1,3 +1,4 @@
+image: Visual Studio 2019
 branches:
   only:
     - testing
@@ -16,12 +17,12 @@ install:
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version $env:platform
   # install modules
-  - npm install --python_include="C:\\\\Python38-x64"
+  - npm install --python_include="C:\\\\Python39-x64"
 
 # Post-install test scripts.
 #test_script:
   - |-
-    SET PATH=C:\\Python38-x64;%PATH%
+    SET PATH=C:\\Python39-x64;%PATH%
   # Output useful info for debugging.
   - node --version
   - npm --version
