@@ -23,7 +23,7 @@ const assert = require('chai').assert
 const crypto = require('crypto')
 const util = require('util')
 
-const loop_count = 10
+const loop_count = 250
 
 let getRandom = n => n === undefined ? 
 	parseInt(crypto.randomBytes(4).toString('hex'), 16) :
@@ -103,8 +103,9 @@ let map_to_object = o => {
 
 let t = describe('pyjs: complexity testing', function() {
 	describe('[rnd] flat random structure echo test', function() {
-		it('01_basic#basic_echo_tester(), 10 iterations, random arrays', function() {
-			this.slow(1000)
+		it(`01_basic#basic_echo_tester(), ${loop_count} iterations, random arrays`, function() {
+			this.slow(10000)
+			this.timeout(15000)
 
 			for (let i = 0; i < loop_count; i++)
 			{
@@ -114,8 +115,9 @@ let t = describe('pyjs: complexity testing', function() {
 			}
 		})
 
-		it('01_basic#basic_echo_tester(), 10 iterations, random objects', function() {
-			this.slow(1000)
+		it(`01_basic#basic_echo_tester(), ${loop_count} iterations, random objects`, function() {
+			this.slow(10000)
+			this.timeout(15000)
 
 			for (let i = 0; i < loop_count; i++)
 			{
@@ -128,9 +130,9 @@ let t = describe('pyjs: complexity testing', function() {
 	})
 
 	describe('[rnd] deep/complex random structure echo test', function() {
-		it('01_basic#basic_echo_tester(), 10 iterations, random deep structures in array', function() {
-			this.slow(1000)
-			this.timeout(3000)
+		it(`01_basic#basic_echo_tester(), ${loop_count} iterations, random deep structures in array`, function() {
+			this.slow(10000)
+			this.timeout(15000)
 
 			for (let i = 0; i < loop_count; i++)
 			{
@@ -142,9 +144,9 @@ let t = describe('pyjs: complexity testing', function() {
 			}
 		})
 
-		it('01_basic#basic_echo_tester(), 10 iterations, random deep structures in object', function() {
-			this.slow(1000)
-			this.timeout(3000)
+		it(`01_basic#basic_echo_tester(), ${loop_count} iterations, random deep structures in object`, function() {
+			this.slow(10000)
+			this.timeout(15000)
 
 			for (let i = 0; i < loop_count; i++)
 			{
