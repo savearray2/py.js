@@ -105,7 +105,11 @@ Napi::Value NapiPyObject::GetAttributeList(const Napi::CallbackInfo &info)
 	PY_CHECK_START();
 
 	PyObject* pyObject = this->container_->get_pyObject();
-	PyObject* dir = PyObject_Dir(pyObject); //PyObject_Dir (New)
+	PyObject* dir = NULL;
+	// FIXME: For now ony use PyObject_Dir for Function and Type (strange segfault on Linux)
+	if (PyFunction_Check(pyObject) || PyType_CheckExact(pyObject)) {
+		dir = PyObject_Dir(pyObject); //PyObject_Dir (New)
+	}
 	if (dir == NULL)
 	{
 		//Not all types have a full object definition, and as such, PyObject_Dir will fail.
