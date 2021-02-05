@@ -63,7 +63,8 @@ std::pair<std::string,PyObject*> pyjs_utils::GetPythonException()
 		msg += "\n";
 	}
 
-	if (ptraceback != NULL)
+	// FIXME: The following code (PyImport_Import) causes occasional segfaults on Linux under 3.9. Needs research.
+	/*if (ptraceback != NULL)
 	{
 		PyObject *module_name, *pyth_module, *pyth_func;
 		module_name = PyUnicode_FromString("traceback"); //PyUnicode_FromString (New)
@@ -108,7 +109,7 @@ std::pair<std::string,PyObject*> pyjs_utils::GetPythonException()
 			msg += str;
 			Py_DECREF(pystr);
 		}
-	}
+	}*/
 
 	return std::make_pair(msg, pvalue);
 }

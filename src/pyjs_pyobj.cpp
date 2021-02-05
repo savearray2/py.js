@@ -106,17 +106,16 @@ Napi::Value NapiPyObject::GetAttributeList(const Napi::CallbackInfo &info)
 
 	PyObject* pyObject = this->container_->get_pyObject();
 	PyObject* dir = NULL;
-	// FIXME: For now ony use PyObject_Dir for Function and Type (strange segfault on Linux)
-	if (PyFunction_Check(pyObject) || PyType_CheckExact(pyObject)) {
+	// FIXME: For now skip PyObject_Dir for PyObjectType::Object (strange segfault on Linux)
+	if (this->type_ != PyObjectType::Object) {
 		dir = PyObject_Dir(pyObject); //PyObject_Dir (New)
+		if (dir == NULL) PyErr_Clear();
 	}
 	if (dir == NULL)
 	{
 		//Not all types have a full object definition, and as such, PyObject_Dir will fail.
 		//In specific, PyMethodDef *tp_methods is init'd to NULL when defining dynamically
 		//generated custom types, and the current API isn't set up to handle that, it seems.
-
-		PyErr_Clear();
 
 		PyObject* dir_name = PyUnicode_FromString("__dir__"); //PyUnicode_FromString (New)
 		PyObject* dir_func = PyObject_GetAttr(pyObject, dir_name); //PyObject_GetItem (New)
@@ -339,9 +338,9 @@ Napi::Value NapiPyObject::FunctionCall(const Napi::CallbackInfo &info)
 
 	PY_CHECK_START();
 	PyObject* retValue = PyObject_Call(pyObject, args, dict); //PyObject_Call (New)
-	PY_CHECK(env, retValue, NULL, env.Undefined());
 	Py_DECREF(args);
 	Py_DECREF(dict);
+	PY_CHECK(env, retValue, NULL, env.Undefined());
 
 	pyjs::MarshallingOptions mo = 
 		NapiPyObject::ProcessMarshallingOptions(info[2]);
