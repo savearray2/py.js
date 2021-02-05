@@ -1033,7 +1033,7 @@ static Napi::Value Initialize(const Napi::CallbackInfo &info)
 	pyjs_async::StartMainPythonLoop(info);
 
 	int res = PyImport_AppendInittab("__pyjs", &PyjsModuleInitAll);
-	if (res < 0 || PyErr_Occurred())
+	if (res < 0)
 		pyjs_utils::ThrowPythonException(env);
 
 	Py_InitializeEx(1);
