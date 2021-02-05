@@ -49,7 +49,7 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 	NapiPyObject* _napi_obj_tmp;
 	if ((_napi_obj_tmp = pyjs::PyjsConfigurationOptions::AttemptNapiObjectUnmarshalling(env, val)))
 	{
-		PyObject* obj = _napi_obj_tmp->GetPyObject(env);
+		obj = _napi_obj_tmp->GetPyObject(env);
 		Py_INCREF(obj); //Clone
 		return std::make_pair(obj,
 			_napi_obj_tmp->GetObjectTypeUnwrapped());
@@ -57,7 +57,7 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 	else if (NapiPyObject::IsInstanceOfNative(env, val))
 	{
 		_napi_obj_tmp = Napi::ObjectWrap<NapiPyObject>::Unwrap(val.As<Napi::Object>());
-		PyObject* obj = _napi_obj_tmp->GetPyObject(env);
+		obj = _napi_obj_tmp->GetPyObject(env);
 		Py_INCREF(obj); //Clone
 		return std::make_pair(obj,
 			_napi_obj_tmp->GetObjectTypeUnwrapped());
@@ -84,7 +84,7 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 	else if (val.Type() == napi_valuetype::napi_bigint)
 	{
 		//TODO: write a better conversion at some point here
-		obj = PyLong_FromString(val.ToString().Utf8Value().c_str(), NULL, 10);
+		obj = PyLong_FromString(val.ToString().Utf8Value().c_str(), NULL, 10); //PyLong_FromString (New)
 		pot = PyObjectType::Integer;
 	}
 	else if (val.IsNumber())
@@ -129,6 +129,7 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 				NapiPyObject* _npo = Napi::ObjectWrap<NapiPyObject>::Unwrap(temp);
 				_npo->SetPyObject(env, obj);
 				_npo->SetObjectType(pot);
+				Py_INCREF(obj);
 				Py_INCREF(obj); //NapiPyObject (Future Delete)
 				filters->operator[](1).Call({ napi_array, temp });
 			}
@@ -209,6 +210,7 @@ std::pair<PyObject*,PyObjectType> pyjs::Js_ConvertToPython(const Napi::Env env,
 				NapiPyObject* _npo = Napi::ObjectWrap<NapiPyObject>::Unwrap(temp);
 				_npo->SetPyObject(env, obj);
 				_npo->SetObjectType(pot);
+				Py_INCREF(obj);
 				Py_INCREF(obj); //Register new, but allow NapiPiObject to handle memory.
 				filters->operator[](1).Call({ napi_obj, temp });
 			}
