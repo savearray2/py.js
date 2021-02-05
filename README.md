@@ -1,4 +1,4 @@
-_I'm a bit busy at the moment, but I do plan on getting this project to basic launch. The only code that needs to be updated before the system can be used practically is the async code that handles Node functions being asynchronously called from Python. The code should be cleaned up a bit, as well._
+_I'm a bit busy at the moment, but have launched the library in a basic form. The library functions properly, but the async code that handles Node functions being asynchronously called from Python needs to be completed. The code should be cleaned up a bit, as well. If there's community demand, I'll try to devote more time to the library._
 
 # py.js
 
@@ -54,16 +54,16 @@ Note: *x86 and ARM architectures have yet to be tested.*
 
 ##### Linux
 * Ubuntu 14.04 LTS, g++6, Node.js 12 LTS, Python 3.5 (x64)
-* Ubuntu 16.04 LTS, g++8, Node.js 12 LTS, Python 3.8 (x64)
-* Ubuntu 16.04 LTS, g++8, Node.js 14, Python 3.8 (x64)
+* Ubuntu 16.04 LTS, g++8, Node.js 14 LTS, Python 3.9 (x64)
+* Ubuntu 16.04 LTS, g++8, Node.js 15, Python 3.9 (x64)
 
 ##### OS X
-* OS X 10.14, Node.js 14, Python 3.8 (x64)
-* OS X 10.15, Node.js 14, Python 3.8 (x64)
+* OS X 10.15, Node.js 14, Python 3.9 (x64)
+* OS X 11.1, Node.js 15, Python 3.9 (x64)
 
 ##### Windows
-* Windows 10, Node.js 12 LTS, Python 3.8, MSVS 2015 (x64)
-* Windows 10, Node.js 14, Python 3.8, MSVS 2015 (x64)
+* Windows 10, Node.js 14 LTS, Python 3.9, MSVS 2019 (x64)
+* Windows 10, Node.js 15, Python 3.9, MSVS 2019 (x64)
 
 *See our build tests here: [Linux & Mac](https://travis-ci.org/savearray2/py.js), [Windows](https://ci.appveyor.com/project/savearray2/py-js).*
 
