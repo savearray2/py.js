@@ -14,6 +14,13 @@
 #//
 #//	You should have received a copy of the GNU Affero General Public License
 #//	along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#//
+#//	Additional permission under the GNU Affero GPL version 3 section 7:
+#//
+#//	If you modify this Program, or any covered work, by linking or
+#//	combining it with other code, such other code is not for that reason
+#//	alone subject to any of the requirements of the GNU Affero GPL
+#//	version 3.
 #//////////////////////////////////////////////////////////////////////////
 
 def async_function_echo_tester(fun):
